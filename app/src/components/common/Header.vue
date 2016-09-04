@@ -23,21 +23,6 @@
 		    <a class="nav-item" href="#">
 		      Blog
 		    </a>
-
-		    <span class="nav-item">
-		      <a class="button" >
-		        <span class="icon">
-		          <i class="fa fa-twitter"></i>
-		        </span>
-		        <span>Tweet</span>
-		      </a>
-		      <a class="button is-primary" href="#">
-		        <span class="icon">
-		          <i class="fa fa-download"></i>
-		        </span>
-		        <span>Download</span>
-		      </a>
-		    </span>
 		  </div>
 		</nav>
 	</header>

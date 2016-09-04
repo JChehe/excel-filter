@@ -15,6 +15,7 @@
 	.upload-btn{
 		position: relative;
 		height: 32px;
+		overflow: hidden;
 	}
 	.file-mask{
 	}

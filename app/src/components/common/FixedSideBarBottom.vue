@@ -1,5 +1,5 @@
 <template>
-	<div class="fixedBottom is-fullwidth panel-block">
+	<div class="fixed-bottom is-fullwidth panel-block">
 		<file-upload-button></file-upload-button>
 	</div>
 </template>
@@ -33,5 +33,7 @@
 	.fixed-bottom{
 		position: absolute;
 		bottom: 0;
+		left: 0;
+		right: 0
 	}
 </style>
