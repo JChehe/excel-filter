@@ -3,7 +3,6 @@
 		<filter-panel></filter-panel>
 		<excel-display></excel-display>
 	</div>
-	
 </template>
 
 <script>

@@ -1,5 +1,5 @@
 <template>
-	<form @submit.prevent="addFilterHandler">
+	<form @submit.prevent="addFilterHandler" :class="{mL32: !getSideBarStatus}">
 		<table class="table">
 			<!-- <caption>添加筛选条件：</caption> -->
 			<thead>
@@ -41,6 +41,8 @@
 </template>
 
 <script>
+	import {addFilter, decrementMain} from '../../vuex/actions'
+	import { getSideBarStatus } from '../../vuex/getters'
 	export default {
 		data(){
 			return {
@@ -51,8 +53,17 @@
 				operator: "0"
 			}
 		},
-		props: {
-
+		vuex: {
+			getters: {
+				getSideBarStatus
+			},
+			actions: {
+				addFilter,
+				decrementMain
+			}
+		},
+		created(){
+			console.log(this.getSideBarStatus)
 		},
 		methods: {
 			addFilterHandler(){
@@ -74,16 +85,25 @@
 				}
 
 				this.operatorVal = ""
-				alert(filterWords)
+				
+				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
+				this.addFilter(filterWords)
+				this.decrementMain()
 			}
 		}
 	}
 </script>
 
 <style scoped>
-table{
-	margin-bottom: 0
-}
+	form{
+		transition: transform .6s;
+	}
+	table{
+		margin-bottom: 0
+	}
+	.mL32{
+		transform:translateX(32px)
+	}
 	caption{
 		text-align: left;
 	}

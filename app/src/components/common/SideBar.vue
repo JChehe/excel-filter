@@ -1,23 +1,25 @@
 <template>
-		<nav id="sidebar" class="panel" v-show="isShow" transition="horizontalMove">
-			<div class="panel-heading has-text-left">
-				文件列表
-				<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" @click="toggleSideBar">
-					<i class="fa fa-angle-left"></i>
-				</span>
-			</div>
-			<div>
-				<search></search>
-				<file-list></file-list>
-				<fixed-side-bar-bottom></fixed-side-bar-bottom>
-			</div>
-		</nav>
+	<nav id="sidebar" class="panel" v-show="getSideBarStatus" transition="horizontalMove">
+		<div class="panel-heading has-text-left">
+			文件列表
+			<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" @click="toggleSideBar">
+				<i class="fa fa-angle-left"></i>
+			</span>
+		</div>
+		<div>
+			<search></search>
+			<file-list></file-list>
+			<fixed-side-bar-bottom></fixed-side-bar-bottom>
+		</div>
+	</nav>
 </template>
 
 <script>
 	import Search from './Search'
 	import FileList from './FileList'
 	import FixedSideBarBottom from './FixedSideBarBottom'
+	import { getSideBarStatus } from '../../vuex/getters'
+	import { toggleSideBar } from '../../vuex/actions'
 
 	export default {
 		components: {
@@ -29,20 +31,12 @@
 			return {
 			}
 		},
-		props: {
-			isShow: {
-				required: true,
-				type: Boolean
-			}
-		},
-		methods: {
-			toggleSideBar(){
-				this.isShow = !this.isShow
-			}
-		},
-		computed: {
-			sidebarStatus: function(){
-				return this.isShow ? "enter" : "leave"
+		vuex: {
+			getters: {
+				getSideBarStatus
+			},
+			actions: {
+				toggleSideBar
 			}
 		}
 

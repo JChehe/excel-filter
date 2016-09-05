@@ -1,18 +1,33 @@
 <template>
-	<span class="tag is-warning">Bar
-		<button class="delete"></button>
+	<span class="tag is-warning">
+		{{ filter }}
+		<button class="delete" @click="delFilter($index)"></button>
 	</span>
 </template>
 
 <script>
+	import {delFilter} from '../../vuex/actions'
 	export default {
+		props: {
+			filter: {
+				type: [Object, String],
+				required: true
+			}
+		},
+		vuex: {
+			actions: {
+				delFilter: delFilter
+			}
+		},
+		methods: {
 
+		}
 	}
 </script>
 
 
 <style scoped>
 	.tag{
-		margin-bottom: 5px;
+		margin:0 5px 5px 0;
 	}
 </style>

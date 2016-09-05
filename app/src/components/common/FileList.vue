@@ -2,15 +2,15 @@
 	<nav class="panel file-panel">
 	  <p class="panel-tabs is-left">
 	    <a href="#" 
-	    	v-for="extension in fileExtensions" 
-	    	:class="{'is-active': $index === curExtensionIndex}" 
-	    	@click="changeExtensions($index, extension)">
-	    	{{ extension }}
+	    	v-for="fileType in allFileType" 
+	    	:class="{'is-active': $index === curTypeIndex}" 
+	    	@click="tabFileType($index, fileType)">
+	    	{{ fileType }}
 	    </a>
 	  </p>
 	  <div class="list">
 	  	<a href="#" class="panel-block"
-	  		v-for="file in filteredFileList">
+	  		v-for="file in fileList | filterByQuery curSearchVal | filterByType curTypeName">
 		    <span class="panel-icon">
 		      <i class="fa fa-book"></i>
 		    </span>
@@ -22,35 +22,31 @@
 
 
 <script>
+	import { changeFileType } from '../../vuex/actions'
+	import { getCurSearchVal, getAllFileType, getFileList} from '../../vuex/getters'
+
 	export default {
 		data(){
 			return {
-				fileExtensions: ["All", "xls", "xlsx"],
-				fileList: ["1.xls", "2.xls", "3.xls", "4.xlsx", "5.xlsx"],
-				curExtensionIndex: 0,
-				curExtensionName: "all"
+				curTypeIndex: 0,
+				curTypeName: "all",
+				filterFileList: []
 			}
 		},
-		created(){
-			// test filterByFileExtension method
-		},
-		computed: {
-			filteredFileList() {
-				return this.filterByFileExtension(this.curExtensionName)
+		vuex: {
+			getters: {
+				fileList: getFileList,
+				allFileType: getAllFileType,
+				curSearchVal: getCurSearchVal
+			},
+			actions: {
+				changeFileType
 			}
 		},
 		methods: {
-			changeExtensions(n, s){
-				this.curExtensionIndex = n
-				this.curExtensionName = s
-			},
-			filterByFileExtension(s){
-				if( s.toUpperCase() === this.fileExtensions[0].toUpperCase()) return this.fileList // 此处返回值还是判断是否是搜索状态下
-				var filterRegExp = new RegExp(( s + "$" ), "gi")
-
-				return this.fileList.filter((fileName, index) => {
-					if(fileName.match(filterRegExp)) return true
-				})
+			tabFileType(n, s){
+				this.curTypeIndex = n
+				this.curTypeName = s
 			}
 		}
 	}

@@ -6,20 +6,19 @@
 				<button class="button" title="筛选完成，导出文件">导出</button>
 			</div>
 		</div>
-		<div class="filter-list has-text-left">
-			<filter-condition-tag></filter-condition-tag>
-			<filter-condition-tag></filter-condition-tag>
-			<filter-condition-tag></filter-condition-tag>
-		</div>
+		<filter-list></filter-list>
 	</div>
 </template>
 
 <script>
-	import FilterConditionTag from './FilterConditionTag'
+	import FilterList from './FilterList'
 	import FilterForm from './FilterForm'
+
+	import {getFilterList} from '../../vuex/getters'
+
 	export default{
 		components: {
-			FilterConditionTag,
+			FilterList,
 			FilterForm
 		},
 		data() {
@@ -56,11 +55,6 @@
 	.filter-area.isShowSideBar{
 		padding-left: 28px;
 	}
-	.filter-list>.tag{
 
-	}
 
-	.filter-area>div{
-		position: relative;
-	}
 </style>

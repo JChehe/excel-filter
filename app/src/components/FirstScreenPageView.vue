@@ -2,9 +2,9 @@
 	<v-header class="is-overlay"></v-header>
 	<main class="is-fullwidth">
 		<div class="columns is-gapless is-mobile is-overlay">
-			<side-bar class="column is-narrow" :is-show.sync="isShow"></side-bar>
+			<side-bar class="column is-narrow"></side-bar>
 			<right-display-area class="column"></right-display-area>
-			<div class="emit-enter-button" title="点击弹出侧边栏" @click="emitSideBarEnter" v-show="!isShow" transition="horizontalMove">
+			<div class="emit-enter-button" title="点击弹出侧边栏" @click="toggleSideBar" v-show="!getSideBarStatus" transition="horizontalMove">
 				<span class="icon is-pulled-right toggle-button">
 					<i class="fa fa-angle-right"></i>
 				</span>
@@ -17,6 +17,8 @@
 	import SideBar from './common/SideBar'
 	import vHeader from './common/Header'
 	import RightDisplayArea from './FirstScreenPageView/RightDisplayArea'
+	import { toggleSideBar } from '../vuex/actions'
+	import { getSideBarStatus } from '../vuex/getters'
 	
 	export default {
 		components: {
@@ -27,12 +29,14 @@
 		name: 'first-screen',
 		data(){
 			return {
-				isShow: true
 			}
 		},
-		methods: {
-			emitSideBarEnter(){
-				this.isShow = true
+		vuex: {
+			getters: {
+				getSideBarStatus
+			},
+			actions: {
+				toggleSideBar
 			}
 		}
 	}
@@ -67,7 +71,7 @@
 		border: 1px solid #ccc;
 		border-left-width: 0;
 		position: fixed;
-		z-index: 800;
+		z-index: 800;margin-top: 4px;
 	}
 	.emit-enter-button>span{
 		position: absolute;

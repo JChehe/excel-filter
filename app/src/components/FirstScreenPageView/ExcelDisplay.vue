@@ -42,10 +42,13 @@
 				curActive: 0
 			}
 		},
-
+	
 		methods: {
 			changeTab(index) {
 				this.curActive = index
+			},
+			sidebarStatus: function() {
+				return this.getSideBarStatus ? "enter" : "leave"
 			}
 		}
 	}

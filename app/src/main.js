@@ -7,12 +7,18 @@ import 'bulma/css/bulma.css'
 import 'font-awesome/css/font-awesome.min.css'
 
 import App from './App'
+import filters from "./filters"
 import routes from './routes'
 
 Vue.use(Electron)
 Vue.use(Resource)
 Vue.use(Router)
 Vue.config.debug = true
+
+console.log(Object.keys(filters))
+Object.keys(filters).forEach((k) => {
+  Vue.filter(k, filters[k])
+})
 
 const router = new Router()
 

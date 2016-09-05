@@ -1,6 +1,6 @@
 <!-- Excel 中的 Sheet -->
 <template>
-	<div class="table-responsive">
+	<div class="table-responsive" :class="{isShowSideBar: !getSideBarStatus}">
 		<table class="table is-bordered">
 			<thead>
 				<tr>
@@ -18,10 +18,17 @@
 </template>
 
 <script>
+	import { getSideBarStatus } from '../../vuex/getters'
+
 	export default {
 		data() {
 			return {
 
+			}
+		},
+		vuex: {
+			getters: {
+				getSideBarStatus
 			}
 		},
 		props: {
@@ -77,7 +84,9 @@
 		overflow: auto;
 		height:calc(100vh - 226px);
 	}
-
+	.table-responsive.isShowSideBar{
+		width: calc(100vw - 24px)
+	}
 	.table-responsive table{
 		width: 100%;
 		max-width: 100%

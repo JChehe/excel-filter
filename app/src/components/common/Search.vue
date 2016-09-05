@@ -1,21 +1,17 @@
 <template>
-	<p class="control has-addons file-search">
-	  <span class="select">
-	    <select v-model="extension">
-	      <option v-for="extension in fileExtensions">
-	      	{{ extension }}
-	      </option>
-	    </select>
-	  </span>
-	  <input class="input is-expanded" type="text" placeholder="搜的一下，奔溃了..." v-model="queryCondition">
-	  <a class="button is-success">
-	    <i class="fa fa-search is-small"></i>
-	  </a>
-	</p>
+	<form @submit.prevent="searchHandler">
+		<div class="control has-addons file-search">
+		  <input class="input is-expanded" type="text" placeholder="搜的一下，奔溃了..." v-model="queryStr">
+		  <button type="submit" class="button is-success">
+		    <i class="fa fa-search is-small"></i>
+		  </button>
+		</div>
+	</form>
 </template>
 
 <script>
-
+	import { changeFileType, changeSearchVal } from '../../vuex/actions'
+	import { getCurSearchVal } from '../../vuex/getters'
 	export default {
 		/* 与文件列表的共同数据
 		fileExtensions
@@ -23,21 +19,21 @@
 		curExtensionName*/
 		data(){
 			return {
-				fileExtensions: ["All", "xls", "xlsx"],
-				curExtensionIndex: 0,
-				curExtensionName: "all",
-				queryCondition: "",
-				extension: "All"
+				queryStr: "",
 			}
 		},
-		pros: {
-
+		vuex: {
+			actions: {
+				changeSearchVal
+			}
 		},
 		methods: {
-			submit(){
-				if(this.queryCondition.trim().length === 0) return false
+			searchHandler(){
+				var queryStr = this.queryStr.trim()
+				// if(queryStr.length === 0) return false
 
-				// 传递给 FileList 组件，进行过滤
+				this.changeSearchVal(queryStr)
+			this.queryStr = ""
 			}
 		}
 	}
