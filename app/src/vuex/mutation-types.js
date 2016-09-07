@@ -10,3 +10,8 @@ export const CHANGE_SEARCH_VALUE = 'CHANGE_SEARCH_VALUE'
 
 // 筛选的 mutations
 export const ADD_FILTER = 'ADD_FILTER'
+export const DEL_FILTER = 'DEL_FILTER'
+
+export const SET_EXCEL_DATA = 'SET_EXCEL_DATA'
+
+export const SET_ACTIVE_SHEET_INDEX = 'SET_ACTIVE_SHEET_INDEX'

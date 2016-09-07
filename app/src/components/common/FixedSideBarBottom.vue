@@ -26,10 +26,7 @@
 	}
 </script>
 
-
 <style scoped>
-	
-
 	.fixed-bottom{
 		position: absolute;
 		bottom: 0;

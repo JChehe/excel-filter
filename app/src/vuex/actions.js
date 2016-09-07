@@ -34,3 +34,11 @@ export const addFilter = ({ dispatch }, val) => {
 export const delFilter = ({ dispatch }, val) => {
 	dispatch(types.DEL_FILTER, val)
 }
+
+export const setExcelData = ({ dispatch }, val) => {
+	dispatch(types.SET_EXCEL_DATA, val)
+}
+
+export const setActiveSheetIndex = ({ dispatch }, val) => {
+	dispatch(types.SET_ACTIVE_SHEET_INDEX, val)
+}

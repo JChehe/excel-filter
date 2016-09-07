@@ -1,16 +1,19 @@
 <!-- Excel 中的 Sheet -->
 <template>
-	<div class="table-responsive" :class="{isShowSideBar: !getSideBarStatus}">
+	<div class="table-responsive" :class="{isShowSideBar: !sideBarStatus}">
 		<table class="table is-bordered">
 			<thead>
 				<tr>
-					<th v-for="col in 255">{{ getCharCol(col) }}</th>
+					<th v-for="col in colNum">{{ getCharCol(col) }}</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="row in 100">
-					<td v-for="col in 20" :title="row + '行' + getCharCol(col) + '列'">{{row + col}}</td>
+				<tr v-for="row in rawNum">
 
+					<td v-for="col in colKeys.length" v-if="col === 0">{{ row + 1 }}</td>
+					<td v-for="(index, col) in colKeys" v-if="col!==0" :title="(row+1) + `行` + getCharCol(index+1) + '列'">
+						{{ sheetData[row][col] }}
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -19,16 +22,14 @@
 
 <script>
 	import { getSideBarStatus } from '../../vuex/getters'
-
 	export default {
 		data() {
 			return {
-
 			}
 		},
 		vuex: {
 			getters: {
-				getSideBarStatus
+				sideBarStatus: getSideBarStatus
 			}
 		},
 		props: {
@@ -38,13 +39,17 @@
 				default() {
 					return []
 				}
+			}
+		},
+		computed: {
+			colNum: function(){
+				return this.colKeys.length + 1
 			},
-			cols: {
-				type: Array,
-				required: true,
-				default() {
-					return []
-				}
+			rawNum: function(){
+				return Math.max(this.sheetData.length) 
+			},
+			colKeys: function(){
+				return Object.keys(this.sheetData[0])
 			}
 		},
 		methods: {
@@ -62,7 +67,7 @@
 			},
 			getNumCol(s){
 				if(!s) return 0
-
+				console.log
 				var n = 0
 			  for(var i = s.length - 1, j = 1; i >= 0; i--, j *= 26){
 			  	var c = s[i].toUpperCase()

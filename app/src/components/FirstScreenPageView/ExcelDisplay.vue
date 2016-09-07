@@ -3,21 +3,26 @@
 	<div class="excel-area">
 		<div class="tabs is-boxed is-small excel-cheet-nav">
 			<ul>
-				<li v-for = "sheetTitle in excelData.SheetNames" :class="{'is-active': $index == curActive}" @click = "changeTab($index)">
+				<li v-for = "sheetName in excelData.sheetNameList" :class="{'is-active': $index == activeSheetIndex}" @click = "changeTab($index)">
 					<a href="javascript:;">
-						<span>sheetTitle</span>
+						<span>{{ sheetName }}</span>
 					</a>
 				</li>
 			</ul>
 		</div>
 		<!-- 根据cheetTittle 动态切换数据 -->
-		<sheet-of-excel :sheets = "excelData.Sheets"></sheet-of-excel>
+
+		<sheet-of-excel 
+			v-for="sheetName in excelData.sheetNameList" 
+			:sheet-data="excelData[sheetName]" v-if="$index === activeSheetIndex">
+		</sheet-of-excel>
 	</div>
 </template>
 
 
 <script>
-
+	import { getExcelData, getActiveSheetIndex } from '../../vuex/getters'
+	import { setActiveSheetIndex } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
 
 	export default {
@@ -26,26 +31,20 @@
 		},
 		data() {
 			return {
-				excelData: {
-			    SheetNames: ['sheet1', 'sheet2'],
-			    Sheets: {
-		        'sheet1': {
-	            'A1': { val: 'sheet1_A1'},
-	            'A2': { val: 'sheet1_A2'}
-		        },
-		        'sheet2': {
-	            'A1': { val: 'sheet2_A1' },
-	            'A2': { val: 'sheet2_A2' }
-		        }
-			    }
-				},
-				curActive: 0
 			}
 		},
-	
+		vuex: {
+			getters: {
+				excelData: getExcelData,
+				activeSheetIndex: getActiveSheetIndex
+			},
+			actions: {
+				setActiveSheetIndex
+			}
+		},
 		methods: {
 			changeTab(index) {
-				this.curActive = index
+				this.setActiveSheetIndex(index)
 			},
 			sidebarStatus: function() {
 				return this.getSideBarStatus ? "enter" : "leave"

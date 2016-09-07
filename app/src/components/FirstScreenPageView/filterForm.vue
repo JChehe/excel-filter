@@ -1,5 +1,5 @@
 <template>
-	<form @submit.prevent="addFilterHandler" :class="{mL32: !getSideBarStatus}">
+	<form @submit.prevent="addFilterHandler" :class="{mL32: !sideBarStatus}">
 		<table class="table">
 			<!-- <caption>添加筛选条件：</caption> -->
 			<thead>
@@ -22,7 +22,7 @@
 					<td class="controls">
 						<div class="select">
 							<select class="select" v-model="operator">
-								<option v-for="op in selectOperators" :value="$index"> {{op}} </option>
+								<option v-for="op in selectOperators" :value="$index"> {{ op }} </option>
 							</select>
 						</div>
 					</td>
@@ -41,8 +41,8 @@
 </template>
 
 <script>
-	import {addFilter, decrementMain} from '../../vuex/actions'
-	import { getSideBarStatus } from '../../vuex/getters'
+	import { addFilter } from '../../vuex/actions'
+	import { getSideBarStatus, getActiveSheetIndex } from '../../vuex/getters'
 	export default {
 		data(){
 			return {
@@ -55,18 +55,16 @@
 		},
 		vuex: {
 			getters: {
-				getSideBarStatus
+				sideBarStatus: getSideBarStatus,
+				activeSheetIndex: getActiveSheetIndex
 			},
 			actions: {
-				addFilter,
-				decrementMain
+				addFilter
 			}
-		},
-		created(){
-			console.log(this.getSideBarStatus)
 		},
 		methods: {
 			addFilterHandler(){
+				var filterObj = {}
 				var filterWords = ""
 				var curCol = this.operatorCol
 				var iOp = this.operator
@@ -83,12 +81,14 @@
 					case 6: filterWords = preStr + `应用了正则表达式"${opVal}"`;break;
 					default: filterWords = preStr + `${cOp}"${opVal}"`;
 				}
+				filterObj["filterWords"] = filterWords
+				filterObj["operator"] = cOp
+				filterObj["value"] = iOp
 
 				this.operatorVal = ""
 				
 				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
-				this.addFilter(filterWords)
-				this.decrementMain()
+				this.addFilter(filterObj)
 			}
 		}
 	}

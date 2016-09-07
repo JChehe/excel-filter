@@ -16,9 +16,19 @@ export function getFileList(state) {
 	return state.fileList.fileList
 }
 // 筛选的 getter
-export function getFilterList(state) {
-	return state.filterList.filterList
+export function getFilterTagList(state) {
+	return state.filterList.filterTagList
 }
 export function getAllFileType(state) {
 	return state.fileList.allFileType
+}
+
+
+export function getExcelData(state) {
+	return state.filterList.excelData
+}
+
+
+export function getActiveSheetIndex(state) {
+	return state.filterList.activeSheetIndex
 }

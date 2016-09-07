@@ -6,19 +6,18 @@
 				<button class="button" title="筛选完成，导出文件">导出</button>
 			</div>
 		</div>
-		<filter-list></filter-list>
+		<filter-tag-list></filter-tag-list>
 	</div>
 </template>
 
 <script>
-	import FilterList from './FilterList'
+	import FilterTagList from './FilterTagList'
 	import FilterForm from './FilterForm'
-
-	import {getFilterList} from '../../vuex/getters'
+	import { getFilterList } from '../../vuex/getters'
 
 	export default{
 		components: {
-			FilterList,
+			FilterTagList,
 			FilterForm
 		},
 		data() {
@@ -31,7 +30,6 @@
 		methods: {
 			submit(){
 				if(filterVal.tirm().length === 0) return false
-
 			}
 		}
 	}
@@ -51,10 +49,7 @@
 		/*vertical-align: middle;*/
 		line-height: 32px;
 	}
-
 	.filter-area.isShowSideBar{
 		padding-left: 28px;
 	}
-
-
 </style>

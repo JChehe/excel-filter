@@ -7,36 +7,30 @@
 
 <script>
 	// import xlsx from './assets/xlsx.full.min.js'
+	import { setExcelData } from '../../vuex/actions'
 	export default {
-		data(){
-			return {
-
-			}
-		},
 		vuex: {
 			getters: {
 
 			},
 			actions: {
-
+				setExcelData
 			}
 		},
 		methods: {
 			handleFile(e) {
 				var files = e.target.files
 				var i,f
-				/*for(var i = 0, f = files[i]; i != files.length; i++){
+				
+				for(var i = 0, f = files[i]; i != files.length; i++){
 					var reader = new FileReader()
 					var name = f.name
-					reader.onload = function(e){
+					reader.onload = (e) => {
 						var data = e.target.result
-
-						var workbook = XLSX.read(data, {type: 'binary'})
-						console.log(workbook)
+						this.setExcelData(data)
 					}
-
 					reader.readAsBinaryString(f)
-				}*/
+				}
 			}
 		}
 	}
