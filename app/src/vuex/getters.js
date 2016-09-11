@@ -29,6 +29,14 @@ export function getExcelData(state) {
 }
 
 
-export function getActiveSheetIndex(state) {
-	return state.filterList.activeSheetIndex
+export function getActiveSheet(state) {
+	return state.filterList.activeSheet
+}
+
+export function getFilteredData(state) {
+	return state.filterList.filteredData
+}
+
+export function getFilterOptions(state) {
+	return state.filterList.filterOptions
 }

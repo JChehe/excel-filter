@@ -7,14 +7,15 @@
 
 <script>
 	// import xlsx from './assets/xlsx.full.min.js'
-	import { setExcelData } from '../../vuex/actions'
+	import { setExcelData, setActiveSheet } from '../../vuex/actions'
 	export default {
 		vuex: {
 			getters: {
 
 			},
 			actions: {
-				setExcelData
+				setExcelData,
+				setActiveSheet
 			}
 		},
 		methods: {
@@ -28,6 +29,7 @@
 					reader.onload = (e) => {
 						var data = e.target.result
 						this.setExcelData(data)
+						this.setActiveSheet(0)
 					}
 					reader.readAsBinaryString(f)
 				}

@@ -3,7 +3,7 @@
 	<div class="excel-area">
 		<div class="tabs is-boxed is-small excel-cheet-nav">
 			<ul>
-				<li v-for = "sheetName in excelData.sheetNameList" :class="{'is-active': $index == activeSheetIndex}" @click = "changeTab($index)">
+				<li v-for = "sheetName in excelData.sheetNameList" :class="{'is-active': $index == activeSheet.index}" @click = "changeTab($index)">
 					<a href="javascript:;">
 						<span>{{ sheetName }}</span>
 					</a>
@@ -14,15 +14,15 @@
 
 		<sheet-of-excel 
 			v-for="sheetName in excelData.sheetNameList" 
-			:sheet-data="excelData[sheetName]" v-if="$index === activeSheetIndex">
+			:sheet-data="filteredData[sheetName]" v-if="$index === activeSheet.index">
 		</sheet-of-excel>
 	</div>
 </template>
 
 
 <script>
-	import { getExcelData, getActiveSheetIndex } from '../../vuex/getters'
-	import { setActiveSheetIndex } from '../../vuex/actions'
+	import { getExcelData, getActiveSheet, getFilteredData } from '../../vuex/getters'
+	import { setActiveSheet } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
 
 	export default {
@@ -36,15 +36,16 @@
 		vuex: {
 			getters: {
 				excelData: getExcelData,
-				activeSheetIndex: getActiveSheetIndex
+				activeSheet: getActiveSheet,
+				filteredData: getFilteredData
 			},
 			actions: {
-				setActiveSheetIndex
+				setActiveSheet
 			}
 		},
 		methods: {
 			changeTab(index) {
-				this.setActiveSheetIndex(index)
+				this.setActiveSheet(index)
 			},
 			sidebarStatus: function() {
 				return this.getSideBarStatus ? "enter" : "leave"

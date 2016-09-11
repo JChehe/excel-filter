@@ -8,10 +8,16 @@
 				</tr>
 			</thead>
 			<tbody>
+				<tr>
+					<td>1</td>
+					<td v-for="col in colKeys">
+						{{ col }}
+					</td>
+				</tr>
 				<tr v-for="row in rawNum">
 
-					<td v-for="col in colKeys.length" v-if="col === 0">{{ row + 1 }}</td>
-					<td v-for="(index, col) in colKeys" v-if="col!==0" :title="(row+1) + `行` + getCharCol(index+1) + '列'">
+					<td v-for="col in colKeys.length" v-if="col === 0">{{ row + 2 }}</td>
+					<td v-for="(index, col) in colKeys" v-if="col!==0" :title="(row+2) + `行` + getCharCol(index+1) + '列'">
 						{{ sheetData[row][col] }}
 					</td>
 				</tr>
@@ -21,7 +27,9 @@
 </template>
 
 <script>
-	import { getSideBarStatus } from '../../vuex/getters'
+	import { getSideBarStatus, getFilteredData } from '../../vuex/getters'
+	import { getCharCol, getNumCol } from '../../utils/excel'
+	
 	export default {
 		data() {
 			return {
@@ -29,7 +37,8 @@
 		},
 		vuex: {
 			getters: {
-				sideBarStatus: getSideBarStatus
+				sideBarStatus: getSideBarStatus,
+				filteredData: getFilteredData
 			}
 		},
 		props: {
@@ -53,30 +62,8 @@
 			}
 		},
 		methods: {
-			/* http://www.cnblogs.com/lavezhang/archive/2012/05/14/2499000.html */ 
-			getCharCol(n){
-				var temCol = "", s = "", m = 0
-
-				while(n > 0){
-					m = n % 26
-					if(m === 0) m = 26
-					s = String.fromCharCode(m + 64) + s
-					n = (n - m) / 26
-				}
-				return s
-			},
-			getNumCol(s){
-				if(!s) return 0
-				console.log
-				var n = 0
-			  for(var i = s.length - 1, j = 1; i >= 0; i--, j *= 26){
-			  	var c = s[i].toUpperCase()
-			  	if( c < 'A' || c > "Z") return 0
-			  	n += (c.charCodeAt() - 64) * j
-			  }
-
-			  return n
-			}
+			getCharCol,
+			getNumCol
 		}
 	}
 

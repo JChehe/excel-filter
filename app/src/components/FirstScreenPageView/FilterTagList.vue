@@ -1,33 +1,38 @@
 <template>
 	<div class="filter-list has-text-left">
-		<filter-condition-tag v-for="filterObj in curFilterTagList" :filter-obj="filterObj">
+		<filter-condition-tag v-for="filterObj in filterTagList[activeSheet.name]" :filter-obj="filterObj">
 		</filter-condition-tag>
 	</div>
 </template>
 
 <script>
 	import FilterConditionTag from './FilterConditionTag'
-	import { getFilterTagList, getActiveSheetIndex, getExcelData } from '../../vuex/getters'
+	import { getFilterTagList, getActiveSheet, getExcelData } from '../../vuex/getters'
 
 	export default {
 		components: {
 			FilterConditionTag
 		},
+		data(){
+			return {
+				curFilterTagList: []
+			}
+		},
 		vuex: {
 			getters: {
 				filterTagList: getFilterTagList,
-				activeSheetIndex: getActiveSheetIndex,
+				activeSheet: getActiveSheet,
 				excelData: getExcelData
 			}
 		},
 		computed: {
-			curFilterTagList: function(){
-				console.log("1212")
-				
-				if(this.excelData && this.excelData.sheetNameList instanceof Array){
-					var curSheetName = this.excelData.sheetNameList[this.activeSheetIndex]
-					console.log(curSheetName)
-					return this.filterTagList[curSheetName]
+			curSheetName: {
+				cache: false,
+				get: function(){
+					if(this.excelData && this.excelData.sheetNameList instanceof Array){
+						var curSheetName = this.activeSheet.name
+						return curSheetName
+					}
 				}
 			}
 		}

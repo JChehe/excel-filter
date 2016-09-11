@@ -39,6 +39,10 @@ export const setExcelData = ({ dispatch }, val) => {
 	dispatch(types.SET_EXCEL_DATA, val)
 }
 
-export const setActiveSheetIndex = ({ dispatch }, val) => {
-	dispatch(types.SET_ACTIVE_SHEET_INDEX, val)
+export const setActiveSheet = ({ dispatch }, val) => {
+	dispatch(types.SET_ACTIVE_SHEET, val)
+}
+
+export const setFilteredData = ({ dispatch }, val) => {
+	dispatch(types.SET_FILTERED_DATA, val)
 }
