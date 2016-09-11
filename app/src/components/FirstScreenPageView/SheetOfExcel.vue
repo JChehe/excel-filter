@@ -58,7 +58,7 @@
 				return Math.max(this.sheetData.length) 
 			},
 			colKeys: function(){
-				return Object.keys(this.sheetData[0])
+				return this.sheetData.length && Object.keys(this.sheetData[0])
 			}
 		},
 		methods: {

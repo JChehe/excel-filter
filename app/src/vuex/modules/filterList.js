@@ -29,6 +29,9 @@ const state = {
   		char: "contain",
   		words: "包含"
   	},{
+      char: "notContain",
+      words: "不包含"
+    },{
   		char: "startsWith",
   		words: "开头字符"
   	},{
@@ -47,7 +50,6 @@ const mutations = {
   	if(state.excelData.sheetNameList && state.excelData.sheetNameList.length > 0){
   		// 首先添加 filterTag
   		var curSheetName = state.excelData.sheetNameList[state.activeSheet.index]
-  		// emitChange(state, curSheetName)
 
   		var tempTagList = Object.assign({}, state.filterTagList)
   		tempTagList[curSheetName].push(filter)
@@ -64,15 +66,13 @@ const mutations = {
   },
   [types.DEL_FILTER] (state, index) {
 		var curSheetName = state.activeSheet.name
-  	// emitChange(state, curSheetName)
 		
 		var tempTagList = Object.assign({}, state.filterTagList)
     tempTagList[curSheetName].splice(index, 1)
   	state.filterTagList = tempTagList
-    console.log("state.filterTagList", state.filterTagList)
 
     var temp = Object.assign({}, state.excelData)
-    
+
   	// 然后进行具体的过滤操作
   	var len = state.filterTagList[curSheetName].length
   	if( len > 0){
@@ -118,7 +118,7 @@ function initFilterState(state, sheetNames) {
 
 var filterOpts = {
   logicalArr: [">", "<", ">=", "<=", "="],
-  conditionArr: ["contain", "startsWith", "endsWith", "regexp"],
+  conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
   filteredData(data, col, operator, target) {
     if(this.logicalArr.includes(operator)){
       return this.filterByLogicalOperator(data, col, operator, target)
@@ -170,6 +170,9 @@ var filterOpts = {
         case "contain":
           return curCol.includes(targetString);
           break;
+        case "notContain":
+          return !curCol.includes(targetString);
+          break;
         case "startsWith":
           return curCol.startsWith(targetString);
           break;
@@ -188,9 +191,9 @@ var filterOpts = {
 
 function emitChange(state, sheetName){
 	state.activeSheet = {
-			index: state.activeSheet.index,
-			name: sheetName
-		}
+		index: state.activeSheet.index,
+		name: sheetName
+	}
 }
 
 
