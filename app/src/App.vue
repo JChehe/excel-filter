@@ -7,7 +7,9 @@
 
   html,
   body { height: 100%; }
-
+  html{
+    overflow: auto;
+  }
   body {
     align-items: center;
     background:

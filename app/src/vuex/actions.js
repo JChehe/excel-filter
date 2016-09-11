@@ -46,3 +46,7 @@ export const setActiveSheet = ({ dispatch }, val) => {
 export const setFilteredData = ({ dispatch }, val) => {
 	dispatch(types.SET_FILTERED_DATA, val)
 }
+
+export const exportFile = ({ dispatch }, val) => {
+	dispatch(types.EXPORT_FILE, val)
+}

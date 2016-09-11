@@ -28,20 +28,24 @@ FilterObj.prototype = {
   /*	exportFileByJSON(json ,fileName, writeOpts){
   		xlsx.writeFile(this.jsonToWBForOneSheet(json), fileName)
   	},*/
-  exportFileByWB(fileName, writeOpts) {
+  exportFileByWB(data, fileName, writeOpts) {
     var finalWB = {
       SheetNames: [],
       Sheets: {}
     }
-    this.sheetNameList.forEach((sheetName, i) => {
-      var wbTem = this.jsonToWBForOneSheet(allFilterResult[i], sheetName)
+    var sheetNameList = data.sheetNameList
+    console.log("sheetNameList", sheetNameList)
+    sheetNameList.forEach((sheetName, i) => {
+      var wbTem = this.jsonToWBForOneSheet(data[sheetName], sheetName)
       finalWB.SheetNames.push(wbTem.SheetNames[0])
       Object.assign(finalWB.Sheets, {
         [sheetName]: wbTem["Sheets"][sheetName]
       })
     })
+    console.log("finalWB", finalWB)
+    var wbout = XLSX.write(finalWB, {bookType:'xlsx', bookSST:false, type: 'binary'});
 
-    xlsx.writeFile(finalWB, fileName)
+saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName)
   },
 
   jsonToWBForOneSheet(json, sheetName) {
@@ -128,4 +132,11 @@ FilterObj.prototype = {
       }
     })
   }
+}
+
+function s2ab(s) {
+  var buf = new ArrayBuffer(s.length);
+  var view = new Uint8Array(buf);
+  for (var i=0; i!=s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+  return buf;
 }

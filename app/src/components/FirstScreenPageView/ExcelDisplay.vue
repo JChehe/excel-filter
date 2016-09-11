@@ -12,7 +12,10 @@
 		</div>
 		<!-- 根据cheetTittle 动态切换数据 -->
 
-		<sheet-of-excel 
+		<div class="drop-area content" @drop="dropHandler" v-if="!excelData.sheetNameList">
+			<p>拖拽一个Excel文件到这里即可完成上传</p>
+		</div>
+		<sheet-of-excel v-else
 			v-for="sheetName in excelData.sheetNameList" 
 			:sheet-data="filteredData[sheetName]" v-if="$index === activeSheet.index">
 		</sheet-of-excel>
@@ -22,7 +25,7 @@
 
 <script>
 	import { getExcelData, getActiveSheet, getFilteredData } from '../../vuex/getters'
-	import { setActiveSheet } from '../../vuex/actions'
+	import { setActiveSheet, setExcelData } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
 
 	export default {
@@ -40,16 +43,44 @@
 				filteredData: getFilteredData
 			},
 			actions: {
-				setActiveSheet
+				setActiveSheet,
+				setExcelData
 			}
+		},
+		created(){
+			setTimeout(() => {
+				var dropArea = document.querySelector(".drop-area")
+				console.log(dropArea)
+				dropArea.addEventListener("dragenter", dragoverHandler, false)
+				dropArea.addEventListener("dragover", dragoverHandler, false)
+				function dragoverHandler(e){
+					e.stopPropagation()
+					e.preventDefault()
+					e.dataTransfer.dropEffect = 'copy'
+				}
+			}, 0)
 		},
 		methods: {
 			changeTab(index) {
 				this.setActiveSheet(index)
 			},
-			sidebarStatus: function() {
-				return this.getSideBarStatus ? "enter" : "leave"
-			}
+			dropHandler(e){
+				e.stopPropagation()
+				e.preventDefault()
+				var files = e.dataTransfer.files
+				var i, f
+				for(var i = 0, f = files[i]; i != files.length; i++){
+					var reader = new FileReader()
+					var name = f.name
+					reader.onload = (e) => {
+						var data = e.target.result
+
+						this.setExcelData(data)
+						this.setActiveSheet(0)
+					}
+					reader.readAsBinaryString(f)
+				}
+			}			
 		}
 	}
 
@@ -69,5 +100,16 @@
 	}
 	.excel-cheet-nav ul{
 		padding-left: 5px;
+	}
+
+	.drop-area{
+		width: calc(100vw - 295px);
+		display: block;
+		overflow: auto;
+		height:calc(100vh - 226px);
+		border: 3px dashed #69707a;
+		display: table-cell;
+		font-size: 18px;
+		vertical-align: middle;
 	}
 </style>

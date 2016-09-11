@@ -18,3 +18,5 @@ export const SET_ACTIVE_SHEET = 'SET_ACTIVE_SHEET'
 
 export const SET_FILTERED_DATA = 'SET_FILTERED_DATA'
 
+export const EXPORT_FILE = 'EXPORT_FILE'
+

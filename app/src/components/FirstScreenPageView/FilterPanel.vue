@@ -3,7 +3,7 @@
 		<div class="is-clearfix">
 			<filter-form class="is-pulled-left"></filter-form>
 			<div class="is-pulled-right">
-				<button class="button" title="筛选完成，导出文件">导出</button>
+				<button class="button" title="筛选完成，导出文件" @click="exportFile">导出</button>
 			</div>
 		</div>
 		<filter-tag-list></filter-tag-list>
@@ -14,6 +14,7 @@
 	import FilterTagList from './FilterTagList'
 	import FilterForm from './FilterForm'
 	import { getFilterList } from '../../vuex/getters'
+	import { exportFile } from '../../vuex/actions'
 
 	export default{
 		components: {
@@ -25,6 +26,11 @@
 				curCol: 1,
 				filterVal: "",
 				colOfSheet: 1
+			}
+		},
+		vuex: {
+			actions: {
+				exportFile
 			}
 		},
 		methods: {

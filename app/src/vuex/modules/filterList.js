@@ -53,14 +53,12 @@ const mutations = {
   		tempTagList[curSheetName].push(filter)
 	  	state.filterTagList = tempTagList
 
+      var temp = Object.assign({}, state.excelData)
 	  	// 然后进行具体的过滤操作
 	  	for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-	  		var temp = Object.assign({}, state.excelData)
 	  		var curFilter = state.filterTagList[curSheetName][i]
-	  		console.log(curFilter)
-	  		temp[curSheetName] = filterOpts.filterByLogicalOperator(state.filteredData[curSheetName], curSheetName, curFilter.col - 1, curFilter.operator, curFilter.value)
+        temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
 	  		state.filteredData = temp
-	  		console.log(state.filteredData)
 	  	}
   	}
   },
@@ -71,14 +69,21 @@ const mutations = {
 		var tempTagList = Object.assign({}, state.filterTagList)
     tempTagList[curSheetName].splice(index, 1)
   	state.filterTagList = tempTagList
+    console.log("state.filterTagList", state.filterTagList)
 
+    var temp = Object.assign({}, state.excelData)
+    
   	// 然后进行具体的过滤操作
   	var len = state.filterTagList[curSheetName].length
   	if( len > 0){
   		for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-	  		var temp = Object.assign({}, state.excelData)
+        console.log("DEL_FILTER =========")
+
+        console.log(temp)
 	  		var curFilter = state.filterTagList[curSheetName][i]
-	  		temp[curSheetName] = filterOpts.filterByLogicalOperator(state.filteredData[curSheetName], curSheetName, curFilter.col - 1, curFilter.operator, curFilter.value)
+        console.log(curFilter)
+	  		temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
+        console.log(temp[curSheetName])
 	  		state.filteredData = temp
 	  	}
   	}else{
@@ -97,6 +102,9 @@ const mutations = {
   		index: index,
   		name: state.excelData.sheetNameList[index]
   	}
+  },
+  [types.EXPORT_FILE] (state, val) {
+    state.excelData.exportFileByWB(state.filteredData, "过滤后的Excel.xlsx")
   }
 }
 
@@ -109,12 +117,21 @@ function initFilterState(state, sheetNames) {
 
 
 var filterOpts = {
-	filterByLogicalOperator(data, sheetName, col, operator, targetNumer) {
-		console.log(data, sheetName, col, operator, targetNumer)
+  logicalArr: [">", "<", ">=", "<=", "="],
+  conditionArr: ["contain", "startsWith", "endsWith", "regexp"],
+  filteredData(data, col, operator, target) {
+    if(this.logicalArr.includes(operator)){
+      return this.filterByLogicalOperator(data, col, operator, target)
+    }
+    else if(this.conditionArr.includes(operator)){
+      return this.filterByCondition(data, col, operator, target)
+    }
+  },
+	filterByLogicalOperator(data, col, operator, targetNumer) {
+		console.log("filterByLogicalOperator", data, col, operator, targetNumer)
     var sheetData = data
     var colKeys = Object.keys(data[0]) // 通过第一个数据 获取col表头
     var selectKey = colKeys[col]
-    console.log(selectKey)
     return sheetData.filter((row, index) => {
       var curCol = parseInt(row[selectKey])
 
@@ -140,12 +157,12 @@ var filterOpts = {
     })
   },
   // 包含、以*开头、以*结尾、正则表达式
-  filterByCondition(sheetName, col, operator, targetString) {
-    var sheetData = this[sheetName]
-    var colKeys = Object.keys(this[sheetName][0])
+  filterByCondition(data, col, operator, targetString) {
+    var sheetData = data
+    var colKeys = Object.keys(data[0])
     var selectKey = colKeys[col]
     var regExp = ""
-    if (operator === "regExp") regExp = new RegExp(targetString, "ig")
+    if (operator.toLowerCase() === "regexp") regexp = new RegExp(targetString, "ig")
     return sheetData.filter((row, index) => {
       var curCol = row[selectKey]
 
@@ -160,7 +177,7 @@ var filterOpts = {
           return curCol.endsWith(targetString);
           break;
         case "regexp":
-          return curCol.match(regExp)
+          return curCol.match(regexp)
           break;
         default:
           return true
