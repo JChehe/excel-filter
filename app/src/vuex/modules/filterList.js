@@ -40,7 +40,13 @@ const state = {
   	},{
   		char: "regexp",
   		words: "正则表达式"
-  	}
+  	},{
+      char: "or",
+      words: "或"
+    },{
+      char: "and",
+      words: "与"
+    }
   ]
 }
 
@@ -56,12 +62,23 @@ const mutations = {
 	  	state.filterTagList = tempTagList
 
       var temp = Object.assign({}, state.excelData)
-	  	// 然后进行具体的过滤操作
-	  	for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-	  		var curFilter = state.filterTagList[curSheetName][i]
-        temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
-	  		state.filteredData = temp
-	  	}
+      // 然后进行具体的过滤操作
+
+      for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
+        var curFilter = state.filterTagList[curSheetName][i]
+
+        // 判断，选择筛选方法
+        if(filterOpts.isSingleColFilterGroup(curFilter.operator)){
+          var subFilters = curFilter.subFilters
+          temp[curSheetName] = filterOpts.filterBySingleLogicGroup(temp[curSheetName], curFilter.operator, subFilters, curFilter.col - 1)
+        }else{
+          temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
+        }
+        // 筛选结果赋值
+        state.filteredData = temp
+      }
+	  	
+	  	
   	}
   },
   [types.DEL_FILTER] (state, index) {
@@ -77,14 +94,18 @@ const mutations = {
   	var len = state.filterTagList[curSheetName].length
   	if( len > 0){
   		for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-        console.log("DEL_FILTER =========")
-
-        console.log(temp)
-	  		var curFilter = state.filterTagList[curSheetName][i]
-        console.log(curFilter)
+	  		/*var curFilter = state.filterTagList[curSheetName][i]
 	  		temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
-        console.log(temp[curSheetName])
-	  		state.filteredData = temp
+	  		state.filteredData = temp*/
+        // 判断，选择筛选方法
+        var curFilter = state.filterTagList[curSheetName][i]
+
+        if(filterOpts.isSingleColFilterGroup(curFilter.operator)){
+          var subFilters = curFilter.subFilters
+          temp[curSheetName] = filterOpts.filterBySingleLogicGroup(temp[curSheetName], curFilter.operator, subFilters, curFilter.col - 1)
+        }else{
+          temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
+        }
 	  	}
   	}else{
   		state.filteredData = Object.assign({}, state.excelData)
@@ -115,91 +136,126 @@ function initFilterState(state, sheetNames) {
 	}
 }
 
-
 var filterOpts = {
   logicalArr: [">", "<", ">=", "<=", "="],
   conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
+
   filteredData(data, col, operator, target) {
-    if(this.logicalArr.includes(operator)){
-      return this.filterByLogicalOperator(data, col, operator, target)
-    }
-    else if(this.conditionArr.includes(operator)){
-      return this.filterByCondition(data, col, operator, target)
+    if(this.isSingleColFilterGroup(operator)){
+      /*filterBySingleLogicGroup.filter(data, operator, )*/
+    }else{
+      return this.filterByOneOperator(data, col, operator, target)
     }
   },
-	filterByLogicalOperator(data, col, operator, targetNumer) {
-		console.log("filterByLogicalOperator", data, col, operator, targetNumer)
+  filterByOneOperator(data, col, operator, target){
     var sheetData = data
     var colKeys = Object.keys(data[0]) // 通过第一个数据 获取col表头
     var selectKey = colKeys[col]
-    return sheetData.filter((row, index) => {
-      var curCol = parseInt(row[selectKey])
 
-      switch (operator) {
-        case ">":
-          if (curCol > targetNumer) return true
-          break;
-        case "<":
-          if (curCol < targetNumer) return true
-          break;
-        case "<=":
-          if (curCol <= targetNumer) return true
-          break;
-        case ">=":
-          if (curCol >= targetNumer) return true
-          break;
-        case "=":
-          if (curCol === targetNumer) return true
-          break;
-        default:
-          return true
-      }
+    var result = sheetData.filter((row, index) => {
+      // var curCol = parseInt(row[selectKey])
+      var curCol = row[selectKey]
+      return this.filterHandleUnit(operator, curCol, target)
     })
+    return result
   },
-  // 包含、以*开头、以*结尾、正则表达式
-  filterByCondition(data, col, operator, targetString) {
+  filterHandleUnit(operator, curVal, target){
+    if(this.logicalArr.includes(operator)){
+      curVal = +curVal
+      target = +target
+    }
+    switch (operator) {
+      case ">":
+        if (curVal > target) return true; break;
+      case "<":
+        if (curVal < target) return true; break;
+      case "<=":
+        if (curVal <= target) return true; break;
+      case ">=":
+        if (curVal >= target) return true; break;
+      case "=":
+        if (curVal === target) return true; break;
+      // 上面是逻辑操作符
+      // 下面是字符串操作符
+      case "contain":
+        return curVal.includes(target); break;
+      case "notContain":
+        return !curVal.includes(target); break;
+      case "startsWith":
+        return curVal.startsWith(target); break;
+      case "endsWith":
+        return curVal.endsWith(target); break;
+      case "regexp":
+        var regexp = new RegExp(target, "ig")
+        return curVal.match(regexp); break;
+      default: 
+        console.log("未匹配操作符")
+        return true
+    }
+  },
+  filterBySingleLogicGroup(data, operator, subFilters, col) {
+    if(operator === "or") {
+      return this.filterByOr(data, subFilters, col)
+    }else if(operator === "and") {
+      return this.filterByAnd(data, subFilters, col)
+    }else{
+      console.log("filterBySingleLogicGroup", "未匹配到operator")
+    }
+  },
+  filterByOr(data, subFilters, col){
     var sheetData = data
     var colKeys = Object.keys(data[0])
     var selectKey = colKeys[col]
-    var regExp = ""
-    if (operator.toLowerCase() === "regexp") regexp = new RegExp(targetString, "ig")
-    return sheetData.filter((row, index) => {
-      var curCol = row[selectKey]
 
-      switch (operator) {
-        case "contain":
-          return curCol.includes(targetString);
-          break;
-        case "notContain":
-          return !curCol.includes(targetString);
-          break;
-        case "startsWith":
-          return curCol.startsWith(targetString);
-          break;
-        case "endsWith":
-          return curCol.endsWith(targetString);
-          break;
-        case "regexp":
-          return curCol.match(regexp)
-          break;
-        default:
+    var result = sheetData.filter((row, index) => {
+      var curCol = row[selectKey]
+      var isPassed = false
+      subFilters.forEach((curSubFilter, index) => {
+        if(filterOpts.filterHandleUnit(curSubFilter.operator, curCol, curSubFilter.val)){
+          isPassed = true
           return true
-      }
+        }
+      })
+      return isPassed
     })
+    return result
+  },
+  filterByAnd(data, subFilters, col){
+    var sheetData = data
+    var colKeys = Object.keys(data[0])
+    var selectKey = colKeys[col]
+
+    var result = sheetData.filter((row, index) => {
+      var curCol = row[selectKey]
+      var isPassed = true // 用于提前结束 forEach
+      subFilters.forEach((curSubFilter, index) => {
+        if(!filterOpts.filterHandleUnit(curSubFilter.operator, curCol, curSubFilter.val)){
+          isPassed = false
+          return true // 用于提前结束 forEach
+        }
+      })
+      return isPassed
+    })
+    return result
+  },
+  isSingleColFilterGroup(operator){
+    if(operator === "or" || operator === "and")
+      return true
   }
 }
 
-function emitChange(state, sheetName){
+/*function emitChange(state, sheetName){
 	state.activeSheet = {
 		index: state.activeSheet.index,
 		name: sheetName
 	}
-}
+}*/
 
 
-function isEmptyObject(obj) {
+
+/*function isEmptyObject(obj) {
 	return Object.getOwnPropertyNames(obj).length === 0
-}
+}*/
 
 export default {
   state,

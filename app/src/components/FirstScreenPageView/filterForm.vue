@@ -10,7 +10,7 @@
 					<th></th>
 				</tr>
 			</thead>
-			<tbody >
+			<tbody>
 				<tr>
 					<td>
 						<p class="select">
@@ -28,8 +28,41 @@
 						</div>
 					</td>
 					<td>
-						<div class="">
+						<!-- 不是“或”和“与”的情况下 -->
+						<div v-if="isNotSingleLogicGroupOperator">
 							<input class="input" type="text" v-model="operatorVal">
+						</div>
+						<!-- 是“或”和“与”的情况下 -->
+						<div v-else>
+							<!-- 已添加的“和”“或”筛选条件 -->
+							<div v-for="(index, subFilter) in subFilters" class="subFilter control has-addons has-addons-centered">
+							  <span class="select">
+							    <select>
+							    	<option :value="subFilter.operator">{{subFilter.words}}</option>
+							    </select>
+							  </span>
+							  <input type="text" class="input is-expanded" readonly="true" 
+							  	:value="subFilter.val">
+							  
+							  <a class="button is-danger"  
+							    @click="removeSubFilter($index)">
+							    删除
+							  </a>
+							</div>
+							<!-- 新增“和或”的按钮 -->
+							<div>
+								<div class="control has-addons has-addons-centered">
+									<span class="select">
+										<select v-model="newFilterOperator">
+								      <option v-for="op in singleLogicGroupOperators" :value="op.char" :selected="$index === 0"> {{ op.words }} </option>
+								    </select>
+								  </span>
+								  <input type="text" class="input is-expanded" v-model="newFilterVal">
+									<a class="button is-success" 
+								  	@click="addSubFilter($index)">
+								    添加
+								  </a>
+							</div>
 						</div>
 					</td>
 					<td class="controls">
@@ -52,7 +85,10 @@
 			return {
 				operatorVal: "",
 				operatorCol: '1',
-				operator: ">"
+				operator: ">",
+				subFilters: [],
+				newFilterOperator: "",
+				newFilterVal: ""
 			}
 		},
 		vuex: {
@@ -72,42 +108,108 @@
 					return this.excelData[this.activeSheet.name].length
 				else
 					return 0
+			},
+			isNotSingleLogicGroupOperator(){
+				return this.operator !== "or" && this.operator !== "and"
+			},
+			singleLogicGroupOperators(){
+				return this.filterOptions.filter((opt, index) => {
+					if(opt.char === "or" || opt.char === "and") {
+						return false
+					}else{
+						return true
+					}
+				})
 			}
 		},
 		methods: {
 			getCharCol,
-			addFilterHandler(){
+			addSubFilter(index) {
+				var subFilterOperator = this.newFilterOperator
+				var subFilterVal = this.newFilterVal
+				var subFilterWords = ""
+				
+				this.filterOptions.forEach((opt, index) => {
+					if(opt.char === subFilterOperator){
+						subFilterWords = opt.words
+						return true
+					}
+				})
+				/*console.log("subFilterOperator", subFilterOperator)
+				console.log("subFilterVal", subFilterVal)
+				console.log("subFilterWords", subFilterWords)*/
+				if(subFilterOperator.length !== 0 && subFilterVal.length !== 0){
+					this.subFilters.push({
+						operator: subFilterOperator,
+						val: subFilterVal,
+						words: subFilterWords
+					})
+
+					this.newFilterOperator = ">" 
+					this.newFilterVal = ""
+				}else{
+					alert("未填写完整")
+				}
+			},
+			removeSubFilter(index) {
+				console.log("index", index)
+				this.subFilters.splice(index, 1)
+			},
+			addFilterHandler() {
+
 				var filterObj = {}
 				var filterWords = ""
 				var curCol = this.operatorCol
 				var operator = this.operator
 				var operatorChar = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
-				console.log(operatorChar)
-				if(opVal.length === 0) return
+				var subFilters = this.subFilters
+				console.log("operatorChar", operatorChar)
+				console.log("opVal", opVal)
+
+				if(opVal.length === 0 && subFilters.length === 0) return
 
 				var preStr = `第${curCol}列的值`
-				// 判断是选择哪个操作符
-				switch(operator){
-					case 'startsWith': ;
-					case 'ends': filterWords = preStr + `的${operatorChar}为“${opVal}”`;break;
-					case 'regexp': filterWords = preStr + `应用了正则表达式"${opVal}"`;break;
-					default: filterWords = preStr + `${operatorChar}"${opVal}"`;
+
+				if(!this.isNotSingleLogicGroupOperator) {
+					var tempStr = ""
+					for(var i = 0, len = subFilters.length; i < len; i++){
+						var curFilter = this.subFilters[i]
+						var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
+						tempStr += i !== len - 1 ? `${primitiveFilterWords} 或 ` : `${primitiveFilterWords}`
+					}
+					filterWords = preStr + tempStr
+				}else{
+					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorChar, opVal)
 				}
 
+				console.log(filterWords)
+				
 				filterObj = {
 					col: curCol,
 					operator: this.operator,
 					value: opVal,
-					filterWords: filterWords
+					filterWords: filterWords,
+					subFilters: this.subFilters
 				}
 
 				this.operatorVal = ""
-				
+				this.subFilters = []
 				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
 				this.addFilter(filterObj)
 			},
-			 getOperatorWords(operator){
+			getFilterWordPrimitive(operator, operatorChar, val){
+				var primitiveFilterWords = ""
+				// 判断是选择哪个操作符
+				switch(operator){
+					case 'startsWith': ;
+					case 'ends': primitiveFilterWords = `的${operatorChar}为“${val}”`;break;
+					case 'regexp': primitiveFilterWords = `应用了正则表达式"${val}"`;break;
+					default: primitiveFilterWords = `${operatorChar}"${val}"`;
+				}
+				return primitiveFilterWords
+			},
+			getOperatorWords(operator){
 			 	for(var i = 0, len = this.filterOptions.length; i < len; i++){
 			 		var obj = this.filterOptions[i]
 			 		if(obj.char === operator) return obj.words

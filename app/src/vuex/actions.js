@@ -32,6 +32,7 @@ export const addFilter = ({ dispatch }, val) => {
 }
 
 export const delFilter = ({ dispatch }, val) => {
+	console.log(val)
 	dispatch(types.DEL_FILTER, val)
 }
 
