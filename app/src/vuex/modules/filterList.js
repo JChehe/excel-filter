@@ -1,15 +1,14 @@
 import * as types from '../mutation-types'
 import * as utils from '../utils.filter'
 
-
 const state = {
   filterTagList: {}, // 筛选条件列表
   excelData: {},
+  filteredData: {},
   activeSheet: {
   	index: 0,
   	name: ""
   },
-  filteredData: {},
   filterOptions: [{
   		char: ">",
   		words: "大于"
@@ -62,23 +61,23 @@ const mutations = {
 	  	state.filterTagList = tempTagList
 
       var temp = Object.assign({}, state.excelData)
+      
       // 然后进行具体的过滤操作
-
       for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
         var curFilter = state.filterTagList[curSheetName][i]
 
-        // 判断，选择筛选方法
-        if(filterOpts.isSingleColFilterGroup(curFilter.operator)){
-          var subFilters = curFilter.subFilters
-          temp[curSheetName] = filterOpts.filterBySingleLogicGroup(temp[curSheetName], curFilter.operator, subFilters, curFilter.col - 1)
-        }else{
-          temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
-        }
+        var subFilters = curFilter.subFilters
+        // 过滤操作
+        temp[curSheetName] = filterOpts.filteredData({
+          sheetData: temp[curSheetName],
+          filterCol: curFilter.col - 1,
+          operator: curFilter.operator,
+          target: curFilter.value,
+          subFilters: subFilters
+        })
         // 筛选结果赋值
         state.filteredData = temp
       }
-	  	
-	  	
   	}
   },
   [types.DEL_FILTER] (state, index) {
@@ -93,29 +92,27 @@ const mutations = {
   	// 然后进行具体的过滤操作
   	var len = state.filterTagList[curSheetName].length
   	if( len > 0){
-  		for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-	  		/*var curFilter = state.filterTagList[curSheetName][i]
-	  		temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
-	  		state.filteredData = temp*/
-        // 判断，选择筛选方法
+  		for(var i = 0; i < len; i++){
         var curFilter = state.filterTagList[curSheetName][i]
 
-        if(filterOpts.isSingleColFilterGroup(curFilter.operator)){
-          var subFilters = curFilter.subFilters
-          temp[curSheetName] = filterOpts.filterBySingleLogicGroup(temp[curSheetName], curFilter.operator, subFilters, curFilter.col - 1)
-        }else{
-          temp[curSheetName] = filterOpts.filteredData(temp[curSheetName], curFilter.col - 1, curFilter.operator, curFilter.value)
-        }
-	  	}
+        var subFilters = curFilter.subFilters
+        // 过滤操作
+        temp[curSheetName] = filterOpts.filteredData({
+          sheetData: temp[curSheetName],
+          filterCol: curFilter.col - 1,
+          operator: curFilter.operator,
+          target: curFilter.value,
+          subFilters: subFilters
+        })
+        // 筛选结果赋值
+        state.filteredData = temp
+      }
   	}else{
   		state.filteredData = Object.assign({}, state.excelData)
   	}
-  	
   },
   [types.SET_EXCEL_DATA] (state, data) {
-
   	state.excelData = new utils.FilterObj().init(data)
-
   	initFilterState(state, state.excelData.sheetNameList)
   },
   [types.SET_ACTIVE_SHEET] (state, index) {
@@ -140,51 +137,42 @@ var filterOpts = {
   logicalArr: [">", "<", ">=", "<=", "="],
   conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
 
-  filteredData(data, col, operator, target) {
-    if(this.isSingleColFilterGroup(operator)){
-      /*filterBySingleLogicGroup.filter(data, operator, )*/
-    }else{
-      return this.filterByOneOperator(data, col, operator, target)
-    }
+  filteredData(args) {
+    var {sheetData, filterCol, operator, target, subFilters} = args
+    if(this.isSingleColFilterGroup(operator))
+      return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
+    else
+      return this.filterByOneOperator({sheetData, filterCol, operator, target})
   },
-  filterByOneOperator(data, col, operator, target){
-    var sheetData = data
-    var colKeys = Object.keys(data[0]) // 通过第一个数据 获取col表头
-    var selectKey = colKeys[col]
+  filterByOneOperator(args){
+    var {sheetData, filterCol, operator, target} = args
+    var colKeys = Object.keys(sheetData[0]) // 通过第一个数据 获取col表头
+    var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
-      // var curCol = parseInt(row[selectKey])
-      var curCol = row[selectKey]
-      return this.filterHandleUnit(operator, curCol, target)
+      var curVal = row[selectKey]
+      return this.filterHandleUnit({operator, curVal, target})
     })
     return result
   },
-  filterHandleUnit(operator, curVal, target){
+  filterHandleUnit(args){
+    var { operator, curVal, target } = args
     if(this.logicalArr.includes(operator)){
       curVal = +curVal
       target = +target
     }
     switch (operator) {
-      case ">":
-        if (curVal > target) return true; break;
-      case "<":
-        if (curVal < target) return true; break;
-      case "<=":
-        if (curVal <= target) return true; break;
-      case ">=":
-        if (curVal >= target) return true; break;
-      case "=":
-        if (curVal === target) return true; break;
+      case ">": return (curVal > target); break;
+      case "<": return (curVal < target); break;
+      case "<=": return (curVal <= target); break;
+      case ">=": return (curVal >= target); break;
+      case "=": return (curVal === target); break;
       // 上面是逻辑操作符
       // 下面是字符串操作符
-      case "contain":
-        return curVal.includes(target); break;
-      case "notContain":
-        return !curVal.includes(target); break;
-      case "startsWith":
-        return curVal.startsWith(target); break;
-      case "endsWith":
-        return curVal.endsWith(target); break;
+      case "contain": return curVal.includes(target); break;
+      case "notContain": return !curVal.includes(target); break;
+      case "startsWith": return curVal.startsWith(target); break;
+      case "endsWith": return curVal.endsWith(target); break;
       case "regexp":
         var regexp = new RegExp(target, "ig")
         return curVal.match(regexp); break;
@@ -193,25 +181,29 @@ var filterOpts = {
         return true
     }
   },
-  filterBySingleLogicGroup(data, operator, subFilters, col) {
-    if(operator === "or") {
-      return this.filterByOr(data, subFilters, col)
-    }else if(operator === "and") {
-      return this.filterByAnd(data, subFilters, col)
-    }else{
+  filterBySingleLogicGroup( args ) {
+    var { sheetData, filterCol, operator, subFilters } = args
+    if(operator === "or") 
+      return this.filterByOr({sheetData, subFilters, filterCol})
+    else if(operator === "and")
+      return this.filterByAnd({sheetData, subFilters, filterCol})
+    else
       console.log("filterBySingleLogicGroup", "未匹配到operator")
-    }
   },
-  filterByOr(data, subFilters, col){
-    var sheetData = data
-    var colKeys = Object.keys(data[0])
-    var selectKey = colKeys[col]
+  filterByOr(args){
+    var { sheetData, subFilters, filterCol } = args
+    var colKeys = Object.keys(sheetData[0])
+    var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
-      var curCol = row[selectKey]
+      var curVal = row[selectKey]
       var isPassed = false
       subFilters.forEach((curSubFilter, index) => {
-        if(filterOpts.filterHandleUnit(curSubFilter.operator, curCol, curSubFilter.val)){
+        if(filterOpts.filterHandleUnit({
+            operator: curSubFilter.operator, 
+            curVal: curVal, 
+            target: curSubFilter.val})){
+
           isPassed = true
           return true
         }
@@ -220,16 +212,21 @@ var filterOpts = {
     })
     return result
   },
-  filterByAnd(data, subFilters, col){
-    var sheetData = data
-    var colKeys = Object.keys(data[0])
-    var selectKey = colKeys[col]
+  filterByAnd(args){
+    var { sheetData, subFilters, filterCol } = args
+    var colKeys = Object.keys(sheetData[0])
+    var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
-      var curCol = row[selectKey]
+      var curVal = row[selectKey]
       var isPassed = true // 用于提前结束 forEach
       subFilters.forEach((curSubFilter, index) => {
-        if(!filterOpts.filterHandleUnit(curSubFilter.operator, curCol, curSubFilter.val)){
+
+        if(!filterOpts.filterHandleUnit({
+            operator: curSubFilter.operator, 
+            curVal: curVal, 
+            target: curSubFilter.val})){
+
           isPassed = false
           return true // 用于提前结束 forEach
         }
