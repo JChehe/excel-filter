@@ -14,13 +14,13 @@
 		  </span>
 
 		  <div class="nav-right nav-menu" :class = "{'show': isShowNav}">
-		    <a class="nav-item" href="#">
+		    <!-- <a class="nav-item" v-link="{ path: 'first-screen' }">
 		      Home
 		    </a>
-		    <a class="nav-item" href="#">
-		      Documentation
-		    </a>
-		    <a class="nav-item" href="#">
+		    <a class="nav-item" v-link="{ path: 'instructions' }">
+		      Instructions
+		    </a> -->
+		    <a class="nav-item" href="javascript:;">
 		      Blog
 		    </a>
 		  </div>

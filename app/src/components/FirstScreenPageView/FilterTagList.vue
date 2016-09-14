@@ -1,6 +1,6 @@
 <template>
 	<div class="filter-list has-text-left">
-		<filter-condition-tag v-for="filterObj in filterTagList[activeSheet.name]" :filter-obj="filterObj" @click="delFilter($index)">
+		<filter-condition-tag v-for="filterObj in filterTagList[activeSheet.name]" :filter-obj="filterObj">
 		</filter-condition-tag>
 	</div>
 </template>
@@ -8,7 +8,6 @@
 <script>
 	import FilterConditionTag from './FilterConditionTag'
 	import { getFilterTagList, getActiveSheet, getExcelData } from '../../vuex/getters'
-	import { delFilter } from '../../vuex/actions'
 
 	export default {
 		components: {
@@ -24,9 +23,6 @@
 				filterTagList: getFilterTagList,
 				activeSheet: getActiveSheet,
 				excelData: getExcelData
-			},
-			actions: {
-				delFilter
 			}
 		},
 		computed: {

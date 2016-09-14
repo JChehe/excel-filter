@@ -6,7 +6,15 @@ export default {
     name: 'landing-page'
   }*/
   '/': {
-  	component: Vue.component('first-screen',require('./components/FirstScreenPageView')),
-  	name: 'first-screen'
+  	component: function(resolve){
+  		require(['./components/FirstScreenPageView'], resolve)
+  	},
+  	name: 'first-screent'
+  },
+  '/instructions': {
+		component: function(resolve){
+  		require(['./components/InstructionsPageView'], resolve)
+  	},
+  	name: 'instructions'
   }
 }

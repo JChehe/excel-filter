@@ -1,5 +1,10 @@
 import * as types from '../mutation-types'
 import * as utils from '../utils.filter'
+import moment from "moment"
+import zh from "moment/locale/zh-cn"
+
+moment.locale("zh") // 设置时间格式为中文
+
 
 const state = {
   filterTagList: {}, // 筛选条件列表
@@ -67,13 +72,16 @@ const mutations = {
         var curFilter = state.filterTagList[curSheetName][i]
 
         var subFilters = curFilter.subFilters
+
+
         // 过滤操作
         temp[curSheetName] = filterOpts.filteredData({
           sheetData: temp[curSheetName],
-          filterCol: curFilter.col - 1,
+          filterCol: curFilter.col,
           operator: curFilter.operator,
           target: curFilter.value,
-          subFilters: subFilters
+          subFilters: subFilters,
+          colOperator: curFilter.colOperator
         })
         // 筛选结果赋值
         state.filteredData = temp
@@ -99,10 +107,11 @@ const mutations = {
         // 过滤操作
         temp[curSheetName] = filterOpts.filteredData({
           sheetData: temp[curSheetName],
-          filterCol: curFilter.col - 1,
+          filterCol: curFilter.col,
           operator: curFilter.operator,
           target: curFilter.value,
-          subFilters: subFilters
+          subFilters: subFilters,
+          colOperator: curFilter.colOperator
         })
         // 筛选结果赋值
         state.filteredData = temp
@@ -138,11 +147,20 @@ var filterOpts = {
   conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
 
   filteredData(args) {
-    var {sheetData, filterCol, operator, target, subFilters} = args
-    if(this.isSingleColFilterGroup(operator))
+    var {sheetData, filterCol, operator, target, subFilters, colOperator} = args
+    if(this.isSingleColFilterGroup(operator)) {
+      console.log("第1.2种情况")
       return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
-    else
-      return this.filterByOneOperator({sheetData, filterCol, operator, target})
+    }else{
+      // 单列组合逻辑（多列运算）
+      if(filterCol instanceof Array){
+        console.log("第2种情况：单列组合逻辑（多列运算）")
+        return this.filterBySingleLogic({sheetData, filterCol, colOperator, operator, target})
+      }else{
+        console.log("第1.1种情况")
+        return this.filterByOneOperator({sheetData, filterCol, operator, target})
+      }
+    }
   },
   filterByOneOperator(args){
     var {sheetData, filterCol, operator, target} = args
@@ -155,6 +173,71 @@ var filterOpts = {
     })
     return result
   },
+  // 单列组合逻辑
+  filterBySingleLogic(args){
+    // 此处 filterCol 是数组
+    var { sheetData, filterCol, colOperator, operator, target } = args
+    var colKeys = Object.keys(sheetData[0])
+    console.log("sheetData===", sheetData)
+    var result = sheetData.filter((row, index) => {
+      console.log("row===", row)
+      // 传递每行数据进来
+      var rowCalcResult = this.multiColCal({
+        row,
+        colOperator,
+        filterCol
+      })
+
+      return this.filterHandleUnit({
+        operator,
+        curVal: rowCalcResult,
+        target
+      })
+    })
+    console.log("filterBySingleLogic", result)
+    return result
+  },
+  // 计算每行是否符合要求
+  multiColCal(args){
+    var { row, colOperator, filterCol } = args
+    var calcResult = 0;
+    var colKeys = Object.keys(row)
+
+    if(!colOperator.includes("time")){
+      for(var i = 0, len = filterCol.length; i < len; i++){
+        var selectKey = colKeys[i]
+        var curVal = +row[selectKey]
+        switch(colOperator){
+          case "+":
+            calcResult += curVal
+            break;
+          case "-":
+            calcResult -= curVal
+            break;
+          case "*":
+            calcResult *= curVal
+            break;
+          case "/":
+            calcResult /= curVal
+            break;
+          case "%":
+            calcResult %= curVal
+          default:
+            console.log("multiColCal", "未匹配操作符")
+        }
+      }
+    }else{
+      var date0 = moment(row[colKeys[filterCol[0] - 1]], "m/d/y hh:mm")
+      var date1 = moment(row[colKeys[filterCol[1] - 1]], "m/d/y hh:mm")
+      var diff = date1.diff(date0, "seconds")
+      // minutes
+      calcResult = Math.floor(diff/60)
+    }
+    
+    return calcResult
+  },
+
+  
   filterHandleUnit(args){
     var { operator, curVal, target } = args
     if(this.logicalArr.includes(operator)){
@@ -240,19 +323,6 @@ var filterOpts = {
       return true
   }
 }
-
-/*function emitChange(state, sheetName){
-	state.activeSheet = {
-		index: state.activeSheet.index,
-		name: sheetName
-	}
-}*/
-
-
-
-/*function isEmptyObject(obj) {
-	return Object.getOwnPropertyNames(obj).length === 0
-}*/
 
 export default {
   state,

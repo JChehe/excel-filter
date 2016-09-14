@@ -3,7 +3,9 @@
 	<div class="excel-area">
 		<div class="tabs is-boxed is-small excel-cheet-nav">
 			<ul>
-				<li v-for = "sheetName in excelData.sheetNameList" :class="{'is-active': $index == activeSheet.index}" @click = "changeTab($index)">
+				<li v-for = "sheetName in excelData.sheetNameList" 
+					:class="{'is-active': $index == activeSheet.index}"
+					@click = "changeTab($index)">
 					<a href="javascript:;">
 						<span>{{ sheetName }}</span>
 					</a>
@@ -12,12 +14,15 @@
 		</div>
 		<!-- 根据cheetTittle 动态切换数据 -->
 
-		<div class="drop-area content" @drop="dropHandler" v-if="!excelData.sheetNameList">
+		<div class="drop-area content" 
+			@drop="dropHandler" 
+			v-if="!excelData.sheetNameList">
 			<p>拖拽一个Excel文件到这里即可完成上传</p>
 		</div>
 		<sheet-of-excel v-else
 			v-for="sheetName in excelData.sheetNameList" 
-			:sheet-data="filteredData[sheetName]" v-if="$index === activeSheet.index">
+			:sheet-data="filteredData[sheetName]" 
+			v-if="$index === activeSheet.index">
 		</sheet-of-excel>
 	</div>
 </template>

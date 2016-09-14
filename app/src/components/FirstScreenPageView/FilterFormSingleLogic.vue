@@ -1,5 +1,5 @@
 <template>
-	<form @submit.prevent="addFilterHandler" :class="{mL32: !sideBarStatus}">
+	<form @submit.prevent="addFilterHandler">
 		<table class="table">
 			<!-- <caption>添加筛选条件：</caption> -->
 			<thead>
@@ -22,7 +22,7 @@
 					</td>
 					<td class="controls">
 						<div class="select">
-							<select class="select" v-model="operator">
+							<select v-model="operator">
 								<option v-for="op in filterOptions" :value="op.char"> {{ op.words }} </option>
 							</select>
 						</div>
@@ -65,7 +65,7 @@
 							</div>
 						</div>
 					</td>
-					<td class="controls">
+					<td>
 						<button class="button">确定</button>
 					</td>
 				</tr>
@@ -89,6 +89,13 @@
 				subFilters: [],
 				newFilterOperator: "",
 				newFilterVal: ""
+			}
+		},
+		props:{
+			activeFilterFormIndex: {
+				required: true,
+				type: Number,
+				default: 0
 			}
 		},
 		vuex: {
@@ -148,11 +155,10 @@
 					this.newFilterOperator = ">" 
 					this.newFilterVal = ""
 				}else{
-					alert("未填写完整")
+					alert("第1.2种表格 未填写完整")
 				}
 			},
 			removeSubFilter(index) {
-				console.log("index", index)
 				this.subFilters.splice(index, 1)
 			},
 			addFilterHandler() {
@@ -161,14 +167,14 @@
 				var filterWords = ""
 				var curCol = this.operatorCol
 				var operator = this.operator
-				var operatorChar = this.getOperatorWords(operator)
+				var operatorWords = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
 				var subFilters = this.subFilters
-				console.log("operatorChar", operatorChar)
-				console.log("opVal", opVal)
 
-				if(opVal.length === 0 && subFilters.length === 0) return
-
+				if(opVal.length === 0 || this.activeFilterFormIndex && subFilters.length === 0) {
+					alert("请填写完整")
+					return
+				}
 				var preStr = `第${curCol}列的值`
 
 				if(!this.isNotSingleLogicGroupOperator) {
@@ -180,32 +186,34 @@
 					}
 					filterWords = preStr + tempStr
 				}else{
-					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorChar, opVal)
+					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
 				}
 
 				console.log(filterWords)
 				
 				filterObj = {
-					col: curCol,
+					col: curCol - 1,
 					operator: this.operator,
 					value: opVal,
 					filterWords: filterWords,
 					subFilters: this.subFilters
 				}
 
-				this.operatorVal = ""
-				this.subFilters = []
 				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
 				this.addFilter(filterObj)
+
+				this.operatorVal = ""
+				this.subFilters = []
+				
 			},
-			getFilterWordPrimitive(operator, operatorChar, val){
+			getFilterWordPrimitive(operator, operatorWords, val){
 				var primitiveFilterWords = ""
 				// 判断是选择哪个操作符
 				switch(operator){
 					case 'startsWith': ;
-					case 'ends': primitiveFilterWords = `的${operatorChar}为“${val}”`;break;
+					case 'ends': primitiveFilterWords = `的${operatorWords}为“${val}”`;break;
 					case 'regexp': primitiveFilterWords = `应用了正则表达式"${val}"`;break;
-					default: primitiveFilterWords = `${operatorChar}"${val}"`;
+					default: primitiveFilterWords = `${operatorWords}"${val}"`;
 				}
 				return primitiveFilterWords
 			},
@@ -221,14 +229,8 @@
 </script>
 
 <style scoped>
-	form{
-		transition: transform .6s;
-	}
 	table{
 		margin-bottom: 0
-	}
-	.mL32{
-		transform:translateX(32px)
 	}
 	caption{
 		text-align: left;
