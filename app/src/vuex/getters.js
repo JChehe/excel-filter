@@ -12,7 +12,7 @@ export function getCurSearchVal(state) {
 export function getSideBarStatus(state) {
 	return state.fileList.isShowSideBar
 }
-export function getFileList(state) {
+export function getUploadFiles(state) {
 	return state.fileList.fileList
 }
 // 筛选的 getter
@@ -40,3 +40,4 @@ export function getFilteredData(state) {
 export function getFilterOptions(state) {
 	return state.filterList.filterOptions
 }
+

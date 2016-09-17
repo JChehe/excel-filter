@@ -30,8 +30,9 @@
 
 <script>
 	import { getExcelData, getActiveSheet, getFilteredData } from '../../vuex/getters'
-	import { setActiveSheet, setExcelData } from '../../vuex/actions'
+	import { setActiveSheet, setExcelData, setUploadFiles } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
+	import fs from 'fs-extra'
 
 	export default {
 		components: {
@@ -49,13 +50,14 @@
 			},
 			actions: {
 				setActiveSheet,
-				setExcelData
+				setExcelData,
+				setUploadFiles
 			}
 		},
 		created(){
 			setTimeout(() => {
 				var dropArea = document.querySelector(".drop-area")
-				console.log(dropArea)
+				
 				dropArea.addEventListener("dragenter", dragoverHandler, false)
 				dropArea.addEventListener("dragover", dragoverHandler, false)
 				function dragoverHandler(e){
@@ -75,6 +77,14 @@
 				var files = e.dataTransfer.files
 				var i, f
 				for(var i = 0, f = files[i]; i != files.length; i++){
+					var curFile = files[i]
+
+					this.setUploadFiles({
+			      path: curFile.path,
+			      name: curFile.name,
+			      extname: path.extname(curFile.path)
+			    })
+					
 					var reader = new FileReader()
 					var name = f.name
 					reader.onload = (e) => {

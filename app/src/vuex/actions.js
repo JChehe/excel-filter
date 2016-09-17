@@ -51,3 +51,7 @@ export const setFilteredData = ({ dispatch }, val) => {
 export const exportFile = ({ dispatch }, val) => {
 	dispatch(types.EXPORT_FILE, val)
 }
+
+export const setUploadFiles = ({ dispatch }, val) => {
+	dispatch(types.SET_UPLOAD_FILES, val)
+}

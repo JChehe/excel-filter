@@ -1,7 +1,10 @@
 import * as types from '../mutation-types'
 
+
+var uploadFiles = window.localStorage.uploadFiles ? JSON.parse(window.localStorage.uploadFiles) : []
+console.log(uploadFiles)
 const state = {
-  fileList: ["1.xls", "2.xls", "3.xls", "4.xlsx", "5.xlsx"], // 最近的excel文件列表（sidebar）
+  fileList: uploadFiles, // 最近的excel文件列表（sidebar）
   allFileType: ["all", "xls", "xlsx"], 
   curSearchVal: "", // 搜索值
   isShowSideBar: true
@@ -16,6 +19,25 @@ const mutations = {
 	},
   [types.CHANGE_SEARCH_VALUE] (state, val) {
     state.curSearchVal = val
+  },
+  [types.SET_UPLOAD_FILES] (state, val) {
+    var isExistent = false
+    var existentIndex = 0
+    state.fileList.forEach((file, index) => {
+      if(file.path === val.path){
+        isExistent = true
+        existentIndex = index
+        return true
+      }
+    })
+    if(isExistent) {
+      state.fileList.splice(existentIndex, 1)
+      state.fileList.unshift(val)
+    }else{
+      state.fileList.unshift(val)
+    }
+    console.log("state.fileList", state.fileList)
+    window.localStorage.setItem("uploadFiles", JSON.stringify(state.fileList))
   }
 }
 

@@ -11,11 +11,6 @@ export default {
   	},
   	name: 'index'
   },
-  '*': {
-      component: function(resolve){
-          require(['./components/FirstScreenPageView'], resolve);
-      }
-  },
   '/instructions': {
 		component: function(resolve){
   		require(['./components/InstructionsPageView'], resolve)

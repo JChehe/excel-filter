@@ -7,7 +7,9 @@
 
 <script>
 	// import xlsx from './assets/xlsx.full.min.js'
-	import { setExcelData, setActiveSheet } from '../../vuex/actions'
+	import fs from 'fs-extra'
+	import path from 'path'
+	import { setExcelData, setActiveSheet, setUploadFiles } from '../../vuex/actions'
 	export default {
 		vuex: {
 			getters: {
@@ -15,15 +17,24 @@
 			},
 			actions: {
 				setExcelData,
-				setActiveSheet
+				setActiveSheet,
+				setUploadFiles
 			}
 		},
 		methods: {
 			handleFile(e) {
 				var files = e.target.files
 				var i,f
-				
+
 				for(var i = 0, f = files[i]; i != files.length; i++){
+					var curFile = files[i]
+					
+					this.setUploadFiles({
+			      path: curFile.path,
+			      name: curFile.name,
+			      extname: path.extname(curFile.path)
+			    })
+
 					var reader = new FileReader()
 					var name = f.name
 					reader.onload = (e) => {

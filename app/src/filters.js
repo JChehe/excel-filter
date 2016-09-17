@@ -4,8 +4,8 @@ export default{
 
 		var filterRegExp = new RegExp(( type + "$" ), "gi")
 
-		return fileList.filter(function(fileName, index) {
-			if(fileName.match(filterRegExp)) return true
+		return fileList.filter(function(file, index) {
+			if(file.name.match(filterRegExp)) return true
 		});
 	},
 	filterByQuery(fileList, query){
@@ -13,8 +13,8 @@ export default{
 
 		var filterRegExp = new RegExp(query, "gi")
 
-		return fileList.filter((fileName, index) => {
-			if(fileName.match(filterRegExp)) return true
+		return fileList.filter((file, index) => {
+			if(file.name.match(filterRegExp)) return true
 		})
 	}
 }

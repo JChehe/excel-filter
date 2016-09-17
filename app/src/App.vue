@@ -6,7 +6,7 @@
   }
 
   html,
-  body { height: 100%; }
+  body { min-height: 100%; }
   html{
     overflow: auto;
   }

@@ -14,7 +14,7 @@
 		    <span class="panel-icon">
 		      <i class="fa fa-book"></i>
 		    </span>
-		    {{ file }}
+		    {{ file.name }}
 		  </a>
 	  </div>
 	</nav>
@@ -23,7 +23,7 @@
 
 <script>
 	import { changeFileType } from '../../vuex/actions'
-	import { getCurSearchVal, getAllFileType, getFileList} from '../../vuex/getters'
+	import { getCurSearchVal, getAllFileType, getUploadFiles} from '../../vuex/getters'
 
 	export default {
 		data(){
@@ -35,7 +35,7 @@
 		},
 		vuex: {
 			getters: {
-				fileList: getFileList,
+				fileList: getUploadFiles,
 				allFileType: getAllFileType,
 				curSearchVal: getCurSearchVal
 			},

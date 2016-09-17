@@ -47,6 +47,8 @@
   },
   "dependencies": {
     "bulma": "^0.1.2",
-    "font-awesome": "^4.6.3"
+    "font-awesome": "^4.6.3",
+    "fs-extra": "^0.30.0",
+    "through2": "^2.0.1"
   }
 }

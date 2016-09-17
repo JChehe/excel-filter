@@ -20,3 +20,4 @@ export const SET_FILTERED_DATA = 'SET_FILTERED_DATA'
 
 export const EXPORT_FILE = 'EXPORT_FILE'
 
+export const SET_UPLOAD_FILES = 'SET_UPLOAD_FILES'
