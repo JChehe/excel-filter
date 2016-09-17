@@ -6,7 +6,7 @@ const pkg = require('./app/package.json')
 let config = {
   // Name of electron app
   // Will be used in production builds
-  name: 'excelf_my',
+  name: '用研数据清洗工具',
 
   // webpack-dev-server port
   port: 9080,

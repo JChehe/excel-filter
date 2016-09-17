@@ -1,15 +1,20 @@
 import Vue from 'vue'
 
 export default {
-/*  '/': {
-    component: Vue.component('landing-page', require('./components/LandingPageView')),
-    name: 'landing-page'
+  /*'/': {
+    component: Vue.component('index', require('./components/FirstScreenPageView')),
+    name: 'index'
   }*/
   '/': {
   	component: function(resolve){
   		require(['./components/FirstScreenPageView'], resolve)
   	},
-  	name: 'first-screent'
+  	name: 'index'
+  },
+  '*': {
+      component: function(resolve){
+          require(['./components/FirstScreenPageView'], resolve);
+      }
   },
   '/instructions': {
 		component: function(resolve){

@@ -26,7 +26,7 @@
 			SideBar,
 			RightDisplayArea
 		},
-		name: 'first-screen',
+		name: 'index',
 		data(){
 			return {
 			}

@@ -14,15 +14,15 @@
 		  </span>
 
 		  <div class="nav-right nav-menu" :class = "{'show': isShowNav}">
-		    <!-- <a class="nav-item" v-link="{ path: 'first-screen' }">
-		      Home
+		    <a class="nav-item" v-link="{ path: 'first-screen' }">
+		      主页
 		    </a>
 		    <a class="nav-item" v-link="{ path: 'instructions' }">
-		      Instructions
-		    </a> -->
-		    <a class="nav-item" href="javascript:;">
-		      Blog
+		      使用介绍
 		    </a>
+		    <!-- <a class="nav-item" href="javascript:;">
+		      Blog
+		    </a> -->
 		  </div>
 		</nav>
 	</header>
