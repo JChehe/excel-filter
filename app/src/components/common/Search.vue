@@ -1,7 +1,8 @@
 <template>
 	<form @submit.prevent="searchHandler">
 		<div class="control has-addons file-search">
-		  <input class="input is-expanded" type="text" placeholder="搜的一下，奔溃了..." v-model="queryStr">
+		  <input class="input is-expanded" type="text" placeholder=" 搜索为空时，则显示全部" 
+		  	v-model="queryStr">
 		  <button type="submit" class="button is-success">
 		    <i class="fa fa-search is-small"></i>
 		  </button>
@@ -13,10 +14,6 @@
 	import { changeFileType, changeSearchVal } from '../../vuex/actions'
 	import { getCurSearchVal } from '../../vuex/getters'
 	export default {
-		/* 与文件列表的共同数据
-		fileExtensions
-		curExtensionIndex
-		curExtensionName*/
 		data(){
 			return {
 				queryStr: "",
@@ -30,10 +27,8 @@
 		methods: {
 			searchHandler(){
 				var queryStr = this.queryStr.trim()
-				// if(queryStr.length === 0) return false
-
 				this.changeSearchVal(queryStr)
-			this.queryStr = ""
+				this.queryStr = ""
 			}
 		}
 	}

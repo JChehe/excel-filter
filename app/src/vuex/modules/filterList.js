@@ -73,7 +73,6 @@ const mutations = {
 
         var subFilters = curFilter.subFilters
 
-
         // 过滤操作
         temp[curSheetName] = filterOpts.filteredData({
           sheetData: temp[curSheetName],
@@ -143,19 +142,31 @@ function initFilterState(state, sheetNames) {
 }
 
 var filterOpts = {
-  logicalArr: [">", "<", ">=", "<=", "="],
+  mathOperaArr: [">", "<", ">=", "<=", "="],
   conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
 
   filteredData(args) {
     var {sheetData, filterCol, operator, target, subFilters, colOperator} = args
+    console.log("原始的", sheetData)
+    
     if(this.isSingleColFilterGroup(operator)) {
-      console.log("第1.2种情况")
-      return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
+      if(filterCol instanceof Array){
+        console.log("第3.2种情况")
+        return true
+      }else{
+        console.log("第1.2种情况")
+        return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
+      }
     }else{
       // 单列组合逻辑（多列运算）
       if(filterCol instanceof Array){
-        console.log("第2种情况：单列组合逻辑（多列运算）")
-        return this.filterBySingleLogic({sheetData, filterCol, colOperator, operator, target})
+        if(colOperator.length === 0){
+          console.log("第3.1种情况")
+          return this.filterByMultiLogic({sheetData, filterCol, operator, target})
+        }else{
+          console.log("第2种情况：单列组合逻辑（多列运算）")
+          return this.filterBySingleLogic({sheetData, filterCol, colOperator, operator, target})
+        }
       }else{
         console.log("第1.1种情况")
         return this.filterByOneOperator({sheetData, filterCol, operator, target})
@@ -172,6 +183,49 @@ var filterOpts = {
       return this.filterHandleUnit({operator, curVal, target})
     })
     return result
+  },
+  // 罗列逻辑运算逻辑
+  filterByMultiLogic(args) {
+    var { sheetData, filterCol, operator, target } = args
+    var colKeys = Object.keys(sheetData[0])
+    console.log(sheetData)
+    sheetData.filter((row, index) => {
+      console.log("row", row)
+      return true
+    })
+    var result = sheetData.filter( (row, index) => {
+      // 以行为单位，注：包含首尾列
+      return this.filterByMultiColOr({
+        rowData: row,
+        filterCols: filterCol,
+        operator,
+        target,
+        colKeys
+      })
+    })
+
+    console.log("Result", result)
+    return result
+  },
+  filterByMultiColOr(args) {
+    var { rowData, filterCols, operator, target, colKeys } = args
+    var isRowPassed = false
+
+    for(var i = 0, len = filterCols.length; i < len; i++) {
+      var selectKey = filterCols[i]
+      var curKey = colKeys[selectKey]
+      var isCurColPassed = this.filterHandleUnit({
+        operator,
+        curVal: rowData[curKey],
+        target: target
+      })
+      if(isCurColPassed) {
+        isRowPassed = true
+        break
+      }
+    }
+
+    return isRowPassed
   },
   // 单列组合逻辑
   filterBySingleLogic(args){
@@ -240,7 +294,7 @@ var filterOpts = {
   
   filterHandleUnit(args){
     var { operator, curVal, target } = args
-    if(this.logicalArr.includes(operator)){
+    if(this.mathOperaArr.includes(operator)){
       curVal = +curVal
       target = +target
     }

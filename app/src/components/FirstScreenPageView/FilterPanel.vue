@@ -1,5 +1,5 @@
 <template>
-	<div class="filter-area" :class="{pL32: !sideBarStatus}">
+	<div :class="['filter-area', {pL32: !sideBarStatus}]">
 		<div class="is-clearfix">
 			<div class="tabs is-boxed is-small filter-form-nav">
 				<ul>
@@ -14,12 +14,22 @@
 			</div>
 			
 			<div >
-				<filter-form-single-logic :active-filter-form-index v-show="activeFilterFormIndex === 0" class="is-pulled-left"></filter-form-single-logic>
-				<filter-form-single-group :active-filter-form-index v-show="activeFilterFormIndex === 1" class="is-pulled-left"></filter-form-single-group>
+				<filter-form-single-logic class="is-pulled-left" 
+					v-show="activeFilterFormIndex === 0">
+				</filter-form-single-logic>
+				<filter-form-single-group class="is-pulled-left" 
+					v-show="activeFilterFormIndex === 1">
+				</filter-form-single-group>
+				<filter-form-multi-logic class="is-pulled-left"
+					v-show="activeFilterFormIndex === 2">
+				</filter-form-multi-logic>
 			</div>
 
 			<div class="is-pulled-right">
-				<button class="button" title="筛选完成，导出文件" @click="exportFile">导出</button>
+				<button class="button" title="筛选完成，导出文件" 
+					@click="exportFile">
+					导出
+				</button>
 			</div>
 		</div>
 		<filter-tag-list></filter-tag-list>
@@ -30,6 +40,7 @@
 	import FilterTagList from './FilterTagList'
 	import FilterFormSingleLogic from './FilterFormSingleLogic'
 	import FilterFormSingleGroup from './FilterFormSingleGroup'
+	import FilterFormMultiLogic from './FilterFormMultiLogic'
 	import { getFilterList, getSideBarStatus} from '../../vuex/getters'
 	import { exportFile } from '../../vuex/actions'
 
@@ -37,7 +48,8 @@
 		components: {
 			FilterTagList,
 			FilterFormSingleLogic,
-			FilterFormSingleGroup
+			FilterFormSingleGroup,
+			FilterFormMultiLogic
 		},
 		data() {
 			return {
@@ -45,7 +57,7 @@
 				filterVal: "",
 				colOfSheet: 1,
 				filterFormNav: ["单列逻辑", "单列组合逻辑", "多列运算逻辑"],
-				activeFilterFormIndex: 0
+				activeFilterFormIndex: 2
 			}
 		},
 		vuex: {
@@ -84,7 +96,6 @@
 		border-radius: 3px 0 0 3px;
 	}
 	#filter-form .label{
-		/*vertical-align: middle;*/
 		line-height: 32px;
 	}
 	.filter-area.isShowSideBar{

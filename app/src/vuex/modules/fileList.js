@@ -36,7 +36,10 @@ const mutations = {
     }else{
       state.fileList.unshift(val)
     }
-    console.log("state.fileList", state.fileList)
+    window.localStorage.setItem("uploadFiles", JSON.stringify(state.fileList))
+  },
+  [types.DEL_UPLOAD_FILES] (state, index) {
+    state.fileList.splice(index, 1)
     window.localStorage.setItem("uploadFiles", JSON.stringify(state.fileList))
   }
 }

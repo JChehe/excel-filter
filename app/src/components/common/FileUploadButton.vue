@@ -1,20 +1,18 @@
 <template>
 	<div class="upload-btn">
 		<button class="button is-primary is-outlined is-fullwidth file-mask">上传Excel文件</button>
-		<input type="file" name="upload-excel-input" @change="handleFile">
+		<input type="file" name="upload-excel-input" 
+			@change="handleFile">
 	</div>
 </template>
 
 <script>
-	// import xlsx from './assets/xlsx.full.min.js'
 	import fs from 'fs-extra'
 	import path from 'path'
 	import { setExcelData, setActiveSheet, setUploadFiles } from '../../vuex/actions'
+	
 	export default {
 		vuex: {
-			getters: {
-
-			},
 			actions: {
 				setExcelData,
 				setActiveSheet,
@@ -48,7 +46,6 @@
 		}
 	}
 </script>
-<!-- <script src="./assets/xlsx.full.min.js"></script> -->
 <style scoped>
 	.upload-btn{
 		position: relative;
@@ -65,6 +62,5 @@
 	}
 	input[name="upload-excel-input"]{
 		opacity: 0;
-		/*pointer-events: none;*/
 	}
 </style>

@@ -8,7 +8,13 @@ FilterObj.prototype = {
   constructor: FilterObj,
 
   init(data) {
-    this.readByData(data)
+    console.log(typeof data)
+    if(typeof data === 'string'){
+      this.readByData(data)
+    }else if(typeof data === 'object'){
+      this.workbook = data
+    }
+    
     this.initData()
     return this
   },
@@ -20,10 +26,19 @@ FilterObj.prototype = {
   },
   initData(){
     this.sheetNameList = this.workbook.SheetNames // 表名列表
+
+    this.initColKeys(this.workbook.Strings)
       // 插入每个sheet的数据（json格式）
     this.sheetNameList.forEach((curSheetName, index) => {
       this[curSheetName] = xlsx.utils.sheet_to_json(this.workbook.Sheets[curSheetName])
     })
+  },
+  initColKeys(data){
+    this.colKeys = [];
+    data.forEach((item, index) => {
+      this.colKeys.push(item.h)
+    })
+    console.log(this.colKeys)
   },
   /*	exportFileByJSON(json ,fileName, writeOpts){
   		xlsx.writeFile(this.jsonToWBForOneSheet(json), fileName)

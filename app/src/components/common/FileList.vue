@@ -1,7 +1,7 @@
 <template>
 	<nav class="panel file-panel">
 	  <p class="panel-tabs is-left">
-	    <a href="#" 
+	    <a href="javascript:;" 
 	    	v-for="fileType in allFileType" 
 	    	:class="{'is-active': $index === curTypeIndex}" 
 	    	@click="tabFileType($index, fileType)">
@@ -9,12 +9,16 @@
 	    </a>
 	  </p>
 	  <div class="list">
-	  	<a href="#" class="panel-block"
+	  	<a href="javascript:;" class="panel-block"
 	  		v-for="file in fileList | filterByQuery curSearchVal | filterByType curTypeName">
 		    <span class="panel-icon">
 		      <i class="fa fa-book"></i>
 		    </span>
 		    {{ file.name }}
+		    <button class="button is-small" 
+		    	@click="confirm(file.path, $index)">
+		    	导入
+		    </button>
 		  </a>
 	  </div>
 	</nav>
@@ -22,8 +26,12 @@
 
 
 <script>
-	import { changeFileType } from '../../vuex/actions'
-	import { getCurSearchVal, getAllFileType, getUploadFiles} from '../../vuex/getters'
+	import xlsx from 'xlsx'
+	import fs from 'fs'
+	import pathModule from 'path'
+
+	import { changeFileType, setExcelData, setActiveSheet, setUploadFiles, delUploadFiles } from '../../vuex/actions'
+	import { getCurSearchVal, getAllFileType, getUploadFiles } from '../../vuex/getters'
 
 	export default {
 		data(){
@@ -40,13 +48,39 @@
 				curSearchVal: getCurSearchVal
 			},
 			actions: {
-				changeFileType
+				changeFileType,
+				setExcelData,
+				setActiveSheet,
+				setUploadFiles,
+				delUploadFiles
 			}
 		},
 		methods: {
 			tabFileType(n, s){
 				this.curTypeIndex = n
 				this.curTypeName = s
+			},
+			confirm(path, index){
+				var isConfirm = window.confirm("导入该文件会覆盖目前的筛选结果，是否确认要导入？")
+				if(isConfirm) {
+					fs.stat(path, (err, stats) => {
+						if(stats && stats.isFile()) {
+							var workbook = xlsx.readFile(path)
+							this.setExcelData(workbook)
+							this.setActiveSheet(0)
+							this.setUploadFiles({
+					      path: path,
+					      name: pathModule.basename(path),
+					      extname: pathModule.extname(path)
+					    })
+						}else{
+							var isDelConfirm = window.confirm("当前文件不存在，是否删除该记录？")
+							if(isDelConfirm) {
+								this.delUploadFiles(index)
+							}
+						}
+					})
+				}
 			}
 		}
 	}
@@ -72,8 +106,23 @@
 		display: block;
 		height: calc(100vh - 226px);
 		overflow: auto;
-	}
-	.list{
 		box-shadow: inset 0 -6px 20px -12px rgba(0,0,0,.7)
+
 	}
+	.list>a{
+		position: relative;
+	}
+	.list>a:hover .button{
+		display: block;
+	}
+	.list .button{
+		display: none;
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		-webkit-transform: translateY(-50%);
+		-ms-transform: translateY(-50%);
+		-o-transform: translateY(-50%);
+		transform: translateY(-50%);
+	}	
 </style>

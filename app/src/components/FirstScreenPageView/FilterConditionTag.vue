@@ -1,7 +1,10 @@
 <template>
-	<span class="tag is-warning" :title="filterObj.operator + filterObj.value">
+	<span class="tag is-warning" 
+		:title="filterObj.operator + filterObj.value">
 		{{ filterObj.filterWords }}
-		<button class="delete" @click="delFilter($index)"></button>
+		<button class="delete" 
+			@click="delFilter($index)">
+		</button>
 	</span>
 </template>
 

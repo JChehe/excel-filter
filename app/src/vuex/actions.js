@@ -55,3 +55,7 @@ export const exportFile = ({ dispatch }, val) => {
 export const setUploadFiles = ({ dispatch }, val) => {
 	dispatch(types.SET_UPLOAD_FILES, val)
 }
+
+export const delUploadFiles = ({ dispatch }, val) => {
+	dispatch(types.DEL_UPLOAD_FILES, val)
+}

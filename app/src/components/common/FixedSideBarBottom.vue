@@ -10,19 +10,7 @@
 	export default {
 		components: {
 			FileUploadButton
-		},
-		data(){
-			return {
-
-			}
-		},
-		pros: {
-
-		},
-		methods: {
-			
 		}
-
 	}
 </script>
 

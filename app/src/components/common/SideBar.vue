@@ -1,8 +1,10 @@
 <template>
-	<nav id="sidebar" class="panel" v-show="getSideBarStatus" transition="horizontalMove">
+	<nav id="sidebar" class="panel" 
+		v-show="getSideBarStatus" transition="horizontalMove">
 		<div class="panel-heading has-text-left">
 			文件列表
-			<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" @click="toggleSideBar">
+			<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" 
+				@click="toggleSideBar">
 				<i class="fa fa-angle-left"></i>
 			</span>
 		</div>
@@ -27,10 +29,6 @@
 			FileList,
 			FixedSideBarBottom
 		},
-		data(){
-			return {
-			}
-		},
 		vuex: {
 			getters: {
 				getSideBarStatus
@@ -42,7 +40,6 @@
 
 	}
 </script>
-
 
 <style scoped>
 	#sidebar{

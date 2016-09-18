@@ -1,6 +1,7 @@
 <template>
 	<div class="filter-list has-text-left">
-		<filter-condition-tag v-for="filterObj in filterTagList[activeSheet.name]" :filter-obj="filterObj">
+		<filter-condition-tag v-for="filterObj in filterTagList[activeSheet.name]" 
+			:filter-obj="filterObj">
 		</filter-condition-tag>
 	</div>
 </template>
@@ -28,7 +29,7 @@
 		computed: {
 			curSheetName: {
 				cache: false,
-				get: function(){
+				get() {
 					if(this.excelData && this.excelData.sheetNameList instanceof Array){
 						var curSheetName = this.activeSheet.name
 						return curSheetName

@@ -13,19 +13,7 @@
 		components: {
 			FilterPanel,
 			ExcelDisplay
-		},
-		data(){
-			return {
-
-			}
-		},
-		pros: {
-
-		},
-		methods: {
-			
 		}
-
 	}
 </script>
 

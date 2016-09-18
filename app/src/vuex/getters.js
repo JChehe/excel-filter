@@ -41,3 +41,6 @@ export function getFilterOptions(state) {
 	return state.filterList.filterOptions
 }
 
+export function getColKeys(state) {
+	return state.filterList.excelData.colKeys
+}

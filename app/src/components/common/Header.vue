@@ -13,7 +13,7 @@
 		    <span></span>
 		  </span>
 
-		  <div class="nav-right nav-menu" :class = "{'show': isShowNav}">
+		  <div :class = "['nav-right','nav-menu',{'show': isShowNav}]">
 		    <a class="nav-item" v-link="{ path: 'first-screen' }">
 		      主页
 		    </a>

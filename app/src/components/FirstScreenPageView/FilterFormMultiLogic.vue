@@ -3,7 +3,7 @@
 		<table class="table">
 			<thead>
 				<tr>
-					<th>选择列</th>
+					<th>选择两列</th>
 					<th>逻辑操作符</th>
 					<th>逻辑操作的值</th>
 					<th></th>
@@ -12,18 +12,10 @@
 			<tbody>
 				<tr>
 					<td>
-						<p class="select">
-							<select v-model="operatorCol">
-								<option v-if="colNum === 0" 
-									:value="1">
-									空
-								</option>
-								<option v-else v-for="col in colNum" 
-									:value="$index+1">
-									{{ getCharCol(col + 1) }}
-								</option>
-							</select>
-						</p>
+						<div>
+							<input type="text" class="input" placeholder="输入列（以，隔开）" 
+								v-model="operatorCol">
+						</div>
 					</td>
 					<td class="controls">
 						<div class="select">
@@ -44,8 +36,8 @@
 						<!-- 是“或”和“与”的情况下 -->
 						<div v-else>
 							<!-- 已添加的“和”“或”筛选条件 -->
-							<div v-for="(index, subFilter) in subFilters" 
-								class="subFilter control has-addons has-addons-centered">
+							<div class="subFilter control has-addons has-addons-centered"
+								v-for="(index, subFilter) in subFilters">
 							  <span class="select">
 							    <select>
 							    	<option :value="subFilter.operator">
@@ -53,9 +45,7 @@
 							    	</option>
 							    </select>
 							  </span>
-							  <input type="text" 
-							  	class="input is-expanded" 
-							  	readonly="true" 
+							  <input type="text" class="input is-expanded" readonly="true" 
 							  	:value="subFilter.val">
 							  <a class="button is-danger"  
 							    @click="removeSubFilter($index)">
@@ -101,7 +91,7 @@
 		data(){
 			return {
 				operatorVal: "",
-				operatorCol: '1',
+				operatorCol: '', // 最终会转为数组
 				operator: ">",
 				subFilters: [],
 				subFilterOperator: "",
@@ -130,11 +120,10 @@
 			},
 			singleLogicGroupOperators(){
 				return this.filterOptions.filter((opt, index) => {
-					if(opt.char === "or" || opt.char === "and") {
+					if(opt.char === "or" || opt.char === "and")
 						return false
-					}else{
+					else
 						return true
-					}
 				})
 			}
 		},
@@ -151,7 +140,8 @@
 						return true
 					}
 				})
-				if(opVal.length === 0 || !this.isNotSingleLogicGroupOperator && subFilters.length === 0){
+			
+				if(subFilterOperator.length !== 0 && subFilterVal.length !== 0){
 					this.subFilters.push({
 						operator: subFilterOperator,
 						val: subFilterVal,
@@ -161,7 +151,7 @@
 					this.subFilterOperator = ">" 
 					this.subFilterVal = ""
 				}else{
-					alert("第1.2种表格 未填写完整")
+					alert("第3.2种表格 未填写完整")
 				}
 			},
 			removeSubFilter(index) {
@@ -171,17 +161,34 @@
 
 				var filterObj = {}
 				var filterWords = ""
-				var curCol = this.operatorCol
+				// var curCol = this.operatorCol
+				var curCol = this.operatorCol.trim().split(/,?，?/)
 				var operator = this.operator
 				var operatorWords = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
 				var subFilters = this.subFilters
 
-				if(opVal.length === 0 || this.activeFilterFormIndex && subFilters.length === 0) {
-					alert("请填写完整")
+				for(var i = 0, len = curCol.length; i < len; i++){
+					var cCol = curCol[i]
+					console.log(cCol)
+					if(cCol.match(/[a-z]/ig)){
+						curCol.splice(i, 1, getNumCol(cCol))
+					}
+				}
+				console.log(curCol)
+
+				if(opVal.length === 0 || !this.isNotSingleLogicGroupOperator && subFilters.length === 0) {
+					alert("3.1请填写完整")
 					return
 				}
-				var preStr = `第${curCol}列的值`
+
+				if(curCol.length > 2){
+					alert("多列运算逻辑只能选择两列")
+					this.operatorCol = ""
+					return 
+				}
+
+				var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值`
 
 				if(!this.isNotSingleLogicGroupOperator) {
 					var tempStr = ""
@@ -197,18 +204,27 @@
 
 				console.log(filterWords)
 				
+				var tempCols = []
+				for(var i = +curCol[0], len = +curCol[1]; i <= len; i++){
+					tempCols.push(i - 1)
+				}
+				curCol = tempCols
+				console.log("根据首尾两元素获得它们之间的所有元素，并且所有元素进行减一处理", curCol)
 				filterObj = {
-					col: curCol - 1,
+					col: curCol,
 					operator: this.operator,
 					value: opVal,
 					filterWords: filterWords,
-					subFilters: this.subFilters
+					subFilters: this.subFilters,
+					colOperator: ""
 				}
-
+				console.log(filterObj)
 				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
 				this.addFilter(filterObj)
+
 				this.operatorVal = ""
 				this.subFilters = []
+				
 			},
 			getFilterWordPrimitive(operator, operatorWords, val){
 				var primitiveFilterWords = ""
@@ -229,7 +245,6 @@
 			}
 		}
 	}
-
 </script>
 
 <style scoped>

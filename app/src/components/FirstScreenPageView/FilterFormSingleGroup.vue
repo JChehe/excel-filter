@@ -14,26 +14,34 @@
 				<tr>
 					<td>
 						<div>
-							<input type="text" class="input" placeholder="输入列（以，隔开）" v-model="operatorCol">
+							<input type="text" class="input" placeholder="输入列（以，隔开）" 
+								v-model="operatorCol">
 						</div>
 					</td>
 					<td>
 						<span class="select">
 							<select v-model="colOperatorSelect">
-								<option v-for="op in colOperator" :value="op.char">{{ op.words }}</option>
+								<option v-for="op in colOperator" 
+									:value="op.char">
+									{{ op.words }}
+								</option>
 							</select>
 						</span>
 					</td>
 					<td>
 						<span class="select">
 							<select v-model="operator">
-								<option v-for="op in singleGroupFilterOptions" :value="op.char">{{ op.words }}</option>
+								<option v-for="op in singleGroupFilterOptions" 
+									:value="op.char">
+									{{ op.words }}
+									</option>
 							</select>
 						</span>
 					</td>
 					<td>
 						<div>
-							<input type="text" class="input" v-model="operatorVal">
+							<input type="text" class="input" 
+								v-model="operatorVal">
 						</div>
 					</td>
 					<td>
@@ -80,13 +88,6 @@
 					char: "-(time)",
 					words: "时间相减"
 				}]
-			}
-		},
-		props:{
-			activeFilterFormIndex: {
-				required: true,
-				type: Number,
-				default: 0
 			}
 		},
 		vuex: {
@@ -139,8 +140,6 @@
 				}
 
 				var preStr = `第${curCol}列的值`
-
-				var tempStr = ""
 
 				filterWords = preStr + this.getFilterWordPrimitive(operator, colOperatorWords, operatorWords, opVal)
 

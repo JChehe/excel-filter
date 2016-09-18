@@ -14,12 +14,15 @@
 		</div>
 		<!-- 根据cheetTittle 动态切换数据 -->
 
-		<div class="drop-area content" 
-			@drop="dropHandler" 
-			v-if="!excelData.sheetNameList">
+		<div v-if="!excelData.sheetNameList"
+			class="drop-area content" 
+			:class="{isShowSideBar: !sideBarStatus}"
+			@drop.prevent.stop="dropHandler" 
+			>
 			<p>拖拽一个Excel文件到这里即可完成上传</p>
 		</div>
 		<sheet-of-excel v-else
+			:class="{isShowSideBar: !sideBarStatus}"
 			v-for="sheetName in excelData.sheetNameList" 
 			:sheet-data="filteredData[sheetName]" 
 			v-if="$index === activeSheet.index">
@@ -29,24 +32,22 @@
 
 
 <script>
-	import { getExcelData, getActiveSheet, getFilteredData } from '../../vuex/getters'
+	import { getExcelData, getActiveSheet, getFilteredData, getSideBarStatus } from '../../vuex/getters'
 	import { setActiveSheet, setExcelData, setUploadFiles } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
 	import fs from 'fs-extra'
+	import path from 'path'
 
 	export default {
 		components: {
 			SheetOfExcel
 		},
-		data() {
-			return {
-			}
-		},
 		vuex: {
 			getters: {
 				excelData: getExcelData,
 				activeSheet: getActiveSheet,
-				filteredData: getFilteredData
+				filteredData: getFilteredData,
+				sideBarStatus: getSideBarStatus
 			},
 			actions: {
 				setActiveSheet,
@@ -72,8 +73,7 @@
 				this.setActiveSheet(index)
 			},
 			dropHandler(e){
-				e.stopPropagation()
-				e.preventDefault()
+				
 				var files = e.dataTransfer.files
 				var i, f
 				for(var i = 0, f = files[i]; i != files.length; i++){
@@ -116,15 +116,19 @@
 	.excel-cheet-nav ul{
 		padding-left: 5px;
 	}
-
-	.drop-area{
+	.drop-area, .table-responsive{
 		width: calc(100vw - 295px);
 		display: block;
 		overflow: auto;
 		height:calc(100vh - 226px);
+	}
+	.drop-area{
 		border: 3px dashed #69707a;
 		display: table-cell;
 		font-size: 18px;
 		vertical-align: middle;
+	}
+	.table-responsive.isShowSideBar, .drop-area.isShowSideBar{
+		width: calc(100vw - 24px)
 	}
 </style>
