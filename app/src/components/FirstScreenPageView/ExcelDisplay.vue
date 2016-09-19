@@ -20,10 +20,11 @@
 				>
 				<p>拖拽一个Excel文件到这里即可完成上传</p>
 			</div>
-			<sheet-of-excel
+			<sheet-of-excel v-for="sheetName in excelData.sheetNameList"
+				:sheet-data="filteredData[activeSheet.name]"
 				v-if="excelData.sheetNameList"
-				:sheet-data="filteredData[activeSheet.name]">
-				
+				v-show="activeSheet.index === $index"
+				>
 			</sheet-of-excel>
 		</div>
 	</div>
@@ -31,11 +32,12 @@
 
 
 <script>
+	import fs from 'fs-extra'
+	import path from 'path'
 	import { getExcelData, getActiveSheet, getFilteredData, getSideBarStatus } from '../../vuex/getters'
 	import { setActiveSheet, setExcelData, setUploadFiles } from '../../vuex/actions'
 	import SheetOfExcel from './SheetOfExcel'
-	import fs from 'fs-extra'
-	import path from 'path'
+	
 
 	export default {
 		components: {
@@ -57,14 +59,16 @@
 		created(){
 			setTimeout(() => {
 				var dropArea = document.querySelector(".drop-area")
-				dropArea.addEventListener("dragenter", dragoverHandler, false)
-				dropArea.addEventListener("dragover", dragoverHandler, false)
-				function dragoverHandler(e){
-					e.stopPropagation()
-					e.preventDefault()
-					e.dataTransfer.dropEffect = 'copy'
+				if(dropArea) {
+					dropArea.addEventListener("dragenter", dragoverHandler, false)
+					dropArea.addEventListener("dragover", dragoverHandler, false)
 				}
 			}, 0)
+			function dragoverHandler(e){
+				e.stopPropagation()
+				e.preventDefault()
+				e.dataTransfer.dropEffect = 'copy'
+			}
 		},
 		methods: {
 			changeTab(index) {

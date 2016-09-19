@@ -3,45 +3,40 @@ export function mainCounter (state) {
   return state.counters.main
 }
 
-// sidebar 的搜索框getter
-export function getCurSearchVal(state) {
-	return state.fileList.curSearchVal
-}	
-
-// sidebar
-export function getSideBarStatus(state) {
-	return state.fileList.isShowSideBar
-}
+// 文件列表相关
 export function getUploadFiles(state) {
 	return state.fileList.fileList
-}
-// 筛选的 getter
-export function getFilterTagList(state) {
-	return state.filterList.filterTagList
 }
 export function getAllFileType(state) {
 	return state.fileList.allFileType
 }
+export function getCurSearchVal(state) {
+	return state.fileList.curSearchVal
+}	
 
 
-export function getExcelData(state) {
-	return state.filterList.excelData
-}
-
-
-export function getActiveSheet(state) {
-	return state.filterList.activeSheet
-}
-
-export function getFilteredData(state) {
-	return state.filterList.filteredData
-}
-
+// 过滤 Excel 数据相关
 export function getFilterOptions(state) {
 	return state.filterList.filterOptions
 }
-
+export function getExcelData(state) {
+	return state.filterList.excelData
+}
+export function getActiveSheet(state) {
+	return state.filterList.activeSheet
+}
+export function getFilterTagList(state) {
+	return state.filterList.filterTagList
+}
+export function getFilteredData(state) {
+	return state.filterList.filteredData
+}
 export function getColKeys(state) {
 	var curSheet = state.filterList.activeSheet
 	return state.filterList.excelData[curSheet.name + '_headers']
+}
+
+// 其他
+export function getSideBarStatus(state) {
+	return state.fileList.isShowSideBar
 }

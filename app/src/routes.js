@@ -1,10 +1,6 @@
 import Vue from 'vue'
 
 export default {
-  /*'/': {
-    component: Vue.component('index', require('./components/FirstScreenPageView')),
-    name: 'index'
-  }*/
   '/': {
   	component: function(resolve){
   		require(['./components/FirstScreenPageView'], resolve)

@@ -1,6 +1,7 @@
 <template>
 	<nav id="sidebar" class="panel" 
-		v-show="getSideBarStatus" transition="horizontalMove">
+		v-show="getSideBarStatus" 
+		transition="horizontalMove">
 		<div class="panel-heading has-text-left">
 			文件列表
 			<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" 
@@ -37,7 +38,6 @@
 				toggleSideBar
 			}
 		}
-
 	}
 </script>
 

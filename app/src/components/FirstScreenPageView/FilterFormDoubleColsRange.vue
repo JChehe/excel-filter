@@ -85,13 +85,13 @@
 <script>
 	import { addFilter } from '../../vuex/actions'
 	import { getActiveSheet, getFilterOptions, getExcelData } from '../../vuex/getters'
-	import { getCharCol } from '../../utils/excel'
+	import { getCharCol } from '../../utils/ExcelSet'
 
 	export default {
 		data(){
 			return {
-				operatorVal: "4",
-				operatorCol: '5,6', // 最终会转为数组
+				operatorVal: "",
+				operatorCol: "", // 最终会转为数组
 				operator: ">",
 				subFilters: [],
 				subFilterOperator: "",
@@ -193,14 +193,14 @@
 					return 
 				}
 
-				var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值`
+				var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值中，存在至少一个`
 
 				if(!this.isNotSingleLogicGroupOperator) {
 					var tempStr = ""
 					for(var i = 0, len = subFilters.length; i < len; i++){
 						var curFilter = this.subFilters[i]
 						var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
-						tempStr += i !== len - 1 ? `${primitiveFilterWords} 或 ` : `${primitiveFilterWords}`
+						tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords}` : `${primitiveFilterWords}`
 					}
 					filterWords = preStr + tempStr
 				}else{

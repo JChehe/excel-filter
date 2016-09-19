@@ -95,7 +95,7 @@
 <script>
 	import { addFilter } from '../../vuex/actions'
 	import { getActiveSheet, getFilterOptions, getExcelData } from '../../vuex/getters'
-	import { getCharCol } from '../../utils/excel'
+	import { getCharCol } from '../../utils/ExcelSet'
 
 	export default {
 		data(){

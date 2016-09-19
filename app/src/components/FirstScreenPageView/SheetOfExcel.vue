@@ -16,11 +16,13 @@
 					</td>
 				</tr>
 				<tr v-for="row in rawNum">
-					<td v-for="col in colKeys.length" 
+					<td v-for="col in colKeys.length"
+						track-by="$index"
 						v-if="col === 0">
 						{{ row + 2 }}
 					</td>
 					<td v-for="(index, col) in colKeys" 
+						track-by="$index"
 						v-if="col!==0" 
 						:title="(row+2) + `行` + getCharCol(index+1) + '列'">
 						{{ sheetData[row][col] }}
@@ -33,7 +35,7 @@
 
 <script>
 	import { getFilteredData, getSideBarStatus, getColKeys } from '../../vuex/getters'
-	import { getCharCol, getNumCol } from '../../utils/excel'
+	import { getCharCol, getNumCol } from '../../utils/ExcelSet'
 	
 	export default {
 		vuex: {
@@ -45,7 +47,7 @@
 		},
 		props: {
 			sheetData: {
-				type: [Array, Object],
+				type: [Array],
 				required: true,
 				default() {
 					return []

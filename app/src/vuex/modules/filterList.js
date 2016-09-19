@@ -1,10 +1,9 @@
 import * as types from '../mutation-types'
-import * as utils from '../utils.filter'
+import * as ExcelSet from '../../utils/ExcelSet'
 import moment from "moment"
 import zh from "moment/locale/zh-cn"
 
 moment.locale("zh") // 设置时间格式为中文
-
 
 const state = {
   filterTagList: {}, // 筛选条件列表
@@ -14,7 +13,8 @@ const state = {
   	index: 0,
   	name: ""
   },
-  filterOptions: [{
+  filterOptions: [
+    {
   		char: ">",
   		words: "大于"
   	},{
@@ -57,248 +57,183 @@ const state = {
   ]
 }
 
+
 // 疑问：修改filterTagList 却不会触发DOM更新。而依赖于 activeSheet
 const mutations = {
-  [types.ADD_FILTER] (state, filter) {
-  	if(state.excelData.sheetNameList && state.excelData.sheetNameList.length > 0){
-  		// 首先添加 filterTag
-  		var curSheetName = state.excelData.sheetNameList[state.activeSheet.index]
+  [types.SET_EXCEL_DATA] (state, data) {
+    state.excelData = new ExcelSet.Excel().init(data)
+    initFilterState(state, state.excelData.sheetNameList)
+  },
 
+  [types.ADD_FILTER] (state, filter) {
+    var curSheetName = state.activeSheet.name
+  	if(state.excelData.sheetNameList && state.excelData.sheetNameList.length > 0){
   		var tempTagList = Object.assign({}, state.filterTagList)
   		tempTagList[curSheetName].push(filter)
 	  	state.filterTagList = tempTagList
-
-      var temp = Object.assign({}, state.excelData)
       
-      // 然后进行具体的过滤操作
-      for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
-        var curFilter = state.filterTagList[curSheetName][i]
-
-        var subFilters = curFilter.subFilters
-
-        // 过滤操作
-        temp[curSheetName] = filterOpts.filteredData({
-          sheetData: temp[curSheetName],
-          filterCol: curFilter.col,
-          operator: curFilter.operator,
-          target: curFilter.value,
-          subFilters: subFilters,
-          colOperator: curFilter.colOperator
-        })
-        // 筛选结果赋值
-        state.filteredData = temp
-      }
-  	}
+      // 筛选结果赋值
+      state.filteredData = addDelHandler()
+  	}else{
+      alert("您还没上传相应的Excel文件。")
+    }
   },
+
   [types.DEL_FILTER] (state, index) {
-		var curSheetName = state.activeSheet.name
-		
+    var curSheetName = state.activeSheet.name
 		var tempTagList = Object.assign({}, state.filterTagList)
     tempTagList[curSheetName].splice(index, 1)
   	state.filterTagList = tempTagList
 
-    var temp = Object.assign({}, state.excelData)
-
   	// 然后进行具体的过滤操作
   	var len = state.filterTagList[curSheetName].length
   	if( len > 0){
-  		for(var i = 0; i < len; i++){
-        var curFilter = state.filterTagList[curSheetName][i]
-
-        var subFilters = curFilter.subFilters
-        // 过滤操作
-        temp[curSheetName] = filterOpts.filteredData({
-          sheetData: temp[curSheetName],
-          filterCol: curFilter.col,
-          operator: curFilter.operator,
-          target: curFilter.value,
-          subFilters: subFilters,
-          colOperator: curFilter.colOperator
-        })
-        // 筛选结果赋值
-        state.filteredData = temp
-      }
+      // 筛选结果赋值
+      state.filteredData = addDelHandler()
   	}else{
   		state.filteredData = Object.assign({}, state.excelData)
   	}
   },
-  [types.SET_EXCEL_DATA] (state, data) {
-  	state.excelData = new utils.FilterObj().init(data)
-  	initFilterState(state, state.excelData.sheetNameList)
-
-    console.log("!!!!", state.excelData)
-  },
+  
   [types.SET_ACTIVE_SHEET] (state, index) {
   	state.activeSheet = {
-  		index: index,
+  		index,
   		name: state.excelData.sheetNameList[index]
   	}
   },
+
   [types.EXPORT_FILE] (state, val) {
     state.excelData.exportFileByWB(state.filteredData, "过滤后的Excel.xlsx")
   }
 }
 
-function initFilterState(state, sheetNames) {
-	for(var i = 0, len = sheetNames.length; i < len; i++) {
-		state.filterTagList[sheetNames[i]] = []
-		state.filteredData[sheetNames[i]] = Object.assign([], state.excelData[sheetNames[i]])
-	}
+export default {
+  state,
+  mutations
 }
 
-var filterOpts = {
-  mathOperaArr: [">", "<", ">=", "<=", "="],
-  conditionArr: ["!=", "contain", "notContain", "startsWith", "endsWith", "regexp"],
 
-  filteredData(args) {
-    var {sheetData, filterCol, operator, target, subFilters, colOperator} = args
-    console.log("原始的", sheetData)
+function initFilterState(state, sheetNames) {
+  for(var i = 0, len = sheetNames.length; i < len; i++) {
+    state.filterTagList[sheetNames[i]] = []
+    state.filteredData[sheetNames[i]] = Object.assign([], state.excelData[sheetNames[i]])
+  }
+}
+
+function addDelHandler(){
+  var curSheetName = state.activeSheet.name
+  var tempFilteredData = Object.assign({}, state.excelData)
+  
+  for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
+    var curFilter = state.filterTagList[curSheetName][i]
+    var subFilters = curFilter.subFilters
+
+    // 过滤操作
+    tempFilteredData[curSheetName] = filterSet.filterDataHandler({
+      sheetData: tempFilteredData[curSheetName],
+      filterCol: curFilter.col,
+      operator: curFilter.operator,
+      target: curFilter.value,
+      subFilters,
+      colOperator: curFilter.colOperator
+    })
+  }
+  return tempFilteredData
+}
+
+var filterSet = {
+  mathOperaArr: [">", "<", ">=", "<="],
+  conditionArr: ["=", "!=", "contain", "notContain", "startsWith", "endsWith", "regexp"],
+
+  filterDataHandler(args) {
+    var { sheetData, filterCol, operator, target, subFilters, colOperator} = args
     
-    if(this.isSingleColFilterGroup(operator)) {
+    if(this.operatorIsAndOr(operator)) {
       if(filterCol instanceof Array){
-        console.log("第3.2种情况")
-        return this.filterByMultiGroup({sheetData, filterCol, operator, subFilters})
+        console.log("第3.2种情况：双列范围逻辑的【or与and】")
+        return this.filterByAndOrForDoubleColsRange({sheetData, filterCol, operator, subFilters})
       }else{
-        console.log("第1.2种情况")
-        return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
+        console.log("第1.2种情况：单列（组合）逻辑的【or与and】")
+        return this.filterByAndOrForSingleCol({sheetData, filterCol, operator, subFilters})
       }
     }else{
       // 单列组合逻辑（多列运算）
       if(filterCol instanceof Array){
         if(colOperator.length === 0){
-          console.log("第3.1种情况")
-          return this.filterByMultiLogic({sheetData, filterCol, operator, target})
+          console.log("第3.1种情况：双列范围逻辑的【非or与and】")
+          return this.filterForDoubleColsRange({sheetData, filterCol, operator, target})
         }else{
-          console.log("第2种情况：单列组合逻辑（多列运算）")
-          return this.filterBySingleLogic({sheetData, filterCol, colOperator, operator, target})
+          console.log("第2种情况：多列运算逻辑")
+          return this.filterByMultiColCalc({sheetData, filterCol, colOperator, operator, target})
         }
       }else{
-        console.log("第1.1种情况")
-        console.log({sheetData, filterCol, operator, target})
+        console.log("第1.1种情况：单列（组合）逻辑的【非or与and】")
         return this.filterByOneOperator({sheetData, filterCol, operator, target})
       }
     }
   },
-  filterByMultiGroup(args) {
-    var {sheetData, filterCol, operator, subFilters} = args
-    if(operator === "or") {
-      return this.filterByMultiOr({sheetData, subFilters, filterCol})
-    }else if(operator === "and"){
-      return this.filterByMultiAnd({sheetData, subFilters, filterCol})
-    }else{
-      console.log("filterByMultiGroup", "未匹配到operator")
-    }
+  filterByAndOrForDoubleColsRange(args) {
+    var {sheetData, filterCols: filterCol, operator, subFilters} = args
+    if(operator === "or")
+      return this.filterByOrForDoubleColsRange({sheetData, subFilters, filterCols})
+    else if(operator === "and")
+      return this.filterByAndForDoubleColsRange({sheetData, subFilters, filterCols})
+    else
+      console.log("filterByAndOrForDoubleColsRange", "未匹配到operator")
   },
-  filterByMultiOr(args) {
-    var { sheetData, filterCol, subFilters } = args
-    var colKeys = state.excelData.colKeys
-    var result = sheetData.filter((row, index) => {
-      return this.filterByMultiOrHandle({
-        rowData: row,
-        filterCol: filterCol,
-        subFilters,
-        colKeys
-      })
+  filterByOrForDoubleColsRange(args) {
+    var { sheetData, filterCols, subFilters } = args
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
+    var result = sheetData.filter((rowData, index) => {
+      var isRowPassed = false
+      // 判断每列是否符合【单列的或逻辑】，即3.2
+      for(var i = 0, len = filterCols.length; i < len; i++) {
+        var filterCol = filterCols[i]
+
+        var isCurColPassed = this.filterByOrForRow({ 
+          rowData,
+          subFilters,
+          filterCol
+        })
+        if(isCurColPassed) {
+          isRowPassed = true
+          break
+        }
+      }
+      return isRowPassed
+    })
+    return result
+  },
+  filterByAndForDoubleColsRange(args) {
+    var { sheetData, filterCols, subFilters } = args
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
+    var result = sheetData.filter((rowData, index) => {
+      var isRowPassed = false
+
+      // 判断每列是否符合【单列的和逻辑】，即3.2
+      for(var i = 0, len = filterCols.length; i < len; i++) {
+        var filterCol = filterCols[i]
+
+        var isCurColPassed = this.filterByAndForRow({
+          rowData,
+          subFilters,
+          filterCol
+        })
+        console.log("isCurColPassed", isCurColPassed)
+        if(isCurColPassed) {
+          isRowPassed = true
+          break
+        }
+      }
+      return isRowPassed
     })
 
     return result
   },
-  filterByMultiOrHandle(args){
-    var {rowData, filterCol, subFilters, colKeys} = args
-    var isRowPassed = false
-
-    for(var i = 0, len = filterCol.length; i < len; i++) {
-      var selectKey = filterCol[i]
-      var curKey = colKeys[selectKey]
-
-      var isCurColPassed = this.filterByMultiOrHandleHandle({
-        rowData: rowData,
-        subFilters: subFilters,
-        filterCol: selectKey
-      })
-      if(isCurColPassed) {
-        isRowPassed = true
-        break
-      }
-    }
-    return isRowPassed
-  },
-  filterByMultiOrHandleHandle(args){
-    var { rowData, subFilters, filterCol } = args
-    var colKeys = state.excelData.colKeys
-    var selectKey = colKeys[filterCol]
-
-      var curVal = rowData[selectKey]
-      var isPassed = false
-      subFilters.forEach((curSubFilter, index) => {
-        if(filterOpts.filterHandleUnit({
-            operator: curSubFilter.operator, 
-            curVal: curVal, 
-            target: curSubFilter.val})){
-
-          isPassed = true
-          return true
-        }
-      })
-      return isPassed
-  },
-  filterByMultiAnd(args) {
-    var { sheetData, filterCol, subFilters } = args
-    var colKeys = state.excelData.colKeys
-    var result = sheetData.filter((row, index) => {
-      return this.filterByMultiOrHandle({
-        rowData: row,
-        filterCol: filterCol,
-        subFilters,
-        colKeys
-      })
-    })
-
-    return result
-  },
-  filterByMultiAndHandle(args){
-    var {rowData, filterCol, subFilters, colKeys} = args
-    var isRowPassed = false
-
-    for(var i = 0, len = filterCol.length; i < len; i++) {
-      var selectKey = filterCol[i]
-      var curKey = colKeys[selectKey]
-
-      var isCurColPassed = this.filterByMultiAndHandleHandle({
-        rowData: rowData,
-        subFilters: subFilters,
-        filterCol: selectKey
-      })
-      if(isCurColPassed) {
-        isRowPassed = true
-        break
-      }
-    }
-    return isRowPassed
-  },
-  filterByMultiAndHandleHandle(args){
-    var { rowData, subFilters, filterCol } = args
-    var colKeys = state.excelData.colKeys
-    var selectKey = colKeys[filterCol]
-
-      var curVal = rowData[selectKey]
-      var isPassed = true // 用于提前结束 forEach
-      subFilters.forEach((curSubFilter, index) => {
-
-        if(!filterOpts.filterHandleUnit({
-            operator: curSubFilter.operator, 
-            curVal: curVal, 
-            target: curSubFilter.val})){
-
-          isPassed = false
-          return true // 用于提前结束 forEach
-        }
-      })
-      return isPassed
-  },
+  
   filterByOneOperator(args){
     var {sheetData, filterCol, operator, target} = args
-    var colKeys = state.excelData.colKeys
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
     var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
@@ -308,81 +243,63 @@ var filterOpts = {
       if(curVal == undefined)
         return false
       else
-        return this.filterHandleUnit({operator, curVal, target})
+        return this.filterUnit({operator, curVal, target})
     })
     return result
   },
-  // 罗列逻辑运算逻辑
-  filterByMultiLogic(args) {
+  // 多列逻辑运算逻辑，即表单3.1
+  filterForDoubleColsRange(args) {
     var { sheetData, filterCol, operator, target } = args
-    var colKeys = state.excelData.colKeys
-    console.log(sheetData)
-    /*sheetData.filter((row, index) => {
-      console.log("row", row)
-      return true
-    })*/
-    var result = sheetData.filter( (row, index) => {
-      // 以行为单位，注：包含首尾列
-      return this.filterByMultiColOr({
-        rowData: row,
-        filterCol: filterCol,
-        operator,
-        target,
-        colKeys
-      })
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
+   
+    var result = sheetData.filter( (rowData, index) => {
+      var isRowPassed = false
+      // 判断每列中是否有一列符合单一逻辑，即3.1
+      for(var i = 0, len = filterCol.length; i < len; i++) {
+        var selectKey = filterCol[i]
+        var curKey = colKeys[selectKey]
+        var isCurColPassed = this.filterUnit({
+          operator,
+          curVal: rowData[curKey],
+          target: target
+        })
+        if(isCurColPassed) {
+          isRowPassed = true
+          break
+        }
+      }
+      return isRowPassed
     })
 
     console.log("Result", result)
     return result
   },
-  filterByMultiColOr(args) {
-    var { rowData, filterCol, operator, target, colKeys } = args
-    var isRowPassed = false
-
-    for(var i = 0, len = filterCol.length; i < len; i++) {
-      var selectKey = filterCol[i]
-      var curKey = colKeys[selectKey]
-      var isCurColPassed = this.filterHandleUnit({
-        operator,
-        curVal: rowData[curKey],
-        target: target
-      })
-      if(isCurColPassed) {
-        isRowPassed = true
-        break
-      }
-    }
-
-    return isRowPassed
-  },
   // 单列组合逻辑
-  filterBySingleLogic(args){
+  filterByMultiColCalc(args){
     // 此处 filterCol 是数组
     var { sheetData, filterCol, colOperator, operator, target } = args
-    var colKeys = state.excelData.colKeys
-    console.log("sheetData===", sheetData)
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
     var result = sheetData.filter((row, index) => {
-      console.log("row===", row)
       // 传递每行数据进来
-      var rowCalcResult = this.multiColCal({
+      var rowCalcResult = this.calcMultiCol({
         row,
         colOperator,
         filterCol
       })
 
-      return this.filterHandleUnit({
+      return this.filterUnit({
         operator,
         curVal: rowCalcResult,
         target
       })
     })
-    console.log("filterBySingleLogic", result)
+    console.log("filterByMultiColCalc", result)
     return result
   },
   // 计算每行是否符合要求
-  multiColCal(args){
+  calcMultiCol(args){
     var { row, colOperator, filterCol } = args
-    var calcResult = 0;
+    var calcResult = 0
     var colKeys = Object.keys(row)
 
     if(!colOperator.includes("time")){
@@ -390,22 +307,12 @@ var filterOpts = {
         var selectKey = colKeys[i]
         var curVal = +row[selectKey]
         switch(colOperator){
-          case "+":
-            calcResult += curVal
-            break;
-          case "-":
-            calcResult -= curVal
-            break;
-          case "*":
-            calcResult *= curVal
-            break;
-          case "/":
-            calcResult /= curVal
-            break;
-          case "%":
-            calcResult %= curVal
-          default:
-            console.log("multiColCal", "未匹配操作符")
+          case "+": calcResult += curVall; break;
+          case "-": calcResult -= curVal; break;
+          case "*": calcResult *= curVal; break;
+          case "/": calcResult /= curVal; break;
+          case "%": calcResult %= curVal; break;
+          default: console.log("calcMultiCol", "未匹配操作符")
         }
       }
     }else{
@@ -415,14 +322,12 @@ var filterOpts = {
       // minutes
       calcResult = Math.floor(diff/60)
     }
-    
     return calcResult
   },
-
   
-  filterHandleUnit(args){
+  filterUnit(args){
     var { operator, curVal, target } = args
-    if(this.mathOperaArr.includes(operator)){
+    if(this.mathOperaArr.includes(operator) && !isNaN(+curVal)){ // +"a" 是 NaN
       curVal = +curVal
       target = +target
     }
@@ -431,10 +336,10 @@ var filterOpts = {
       case "<": return (curVal < target); break;
       case "<=": return (curVal <= target); break;
       case ">=": return (curVal >= target); break;
-      case "=": console.log("==", curVal, "=", target, "=", curVal == target);return (curVal == target); break;
+      case "=": return (curVal == target); break;
       // 上面是逻辑操作符
       // 下面是字符串操作符
-      // 因为!=可用于字符串的对比，因此不放在逻辑操作符内
+      // 因为= !=可用于字符串的对比，因此不放在逻辑操作符内
       case "!=": console.log(curVal); return (curVal != target); break; 
       case "contain": return curVal.includes(target); break;
       case "notContain": return !curVal.includes(target); break;
@@ -448,66 +353,59 @@ var filterOpts = {
         return true
     }
   },
-  filterBySingleLogicGroup( args ) {
+  filterByAndOrForSingleCol( args ) {
     var { sheetData, filterCol, operator, subFilters } = args
     if(operator === "or") 
-      return this.filterByOr({sheetData, subFilters, filterCol})
+      return sheetData.filter((rowData, index) => {
+        return this.filterByOrForRow({rowData, subFilters, filterCol})
+      })
     else if(operator === "and")
-      return this.filterByAnd({sheetData, subFilters, filterCol})
+      return sheetData.filter((rowData, index) => {
+        return this.filterByAndForRow({rowData, subFilters, filterCol})
+      })
     else
-      console.log("filterBySingleLogicGroup", "未匹配到operator")
+      console.log("filterByAndOrForSingleCol", "未匹配到operator")
   },
-  filterByOr(args){
-    var { sheetData, subFilters, filterCol } = args
-    var colKeys = state.excelData.colKeys
+  filterByOrForRow(args){
+    var { rowData, subFilters, filterCol } = args
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
     var selectKey = colKeys[filterCol]
 
-    var result = sheetData.filter((row, index) => {
-      var curVal = row[selectKey]
-      var isPassed = false
-      subFilters.forEach((curSubFilter, index) => {
-        if(filterOpts.filterHandleUnit({
-            operator: curSubFilter.operator, 
-            curVal: curVal, 
-            target: curSubFilter.val})){
+    var curVal = rowData[selectKey]
+    var isPassed = false
+    subFilters.forEach((curSubFilter, index) => {
+      if(filterSet.filterUnit({
+          operator: curSubFilter.operator, 
+          curVal: curVal, 
+          target: curSubFilter.val})){
 
-          isPassed = true
-          return true
-        }
-      })
-      return isPassed
+        isPassed = true
+        return true
+      }
     })
+    return isPassed
   },
-  filterByAnd(args){
-    var { sheetData, subFilters, filterCol } = args
-    var colKeys = state.excelData.colKeys
+  filterByAndForRow(args){
+    var { rowData, subFilters, filterCol } = args
+    var colKeys = state.excelData[state.activeSheet.name + '_headers']
     var selectKey = colKeys[filterCol]
 
-    var result = sheetData.filter((row, index) => {
-      var curVal = row[selectKey]
-      var isPassed = true // 用于提前结束 forEach
-      subFilters.forEach((curSubFilter, index) => {
+    var curVal = rowData[selectKey]
+    var isPassed = true // 用于提前结束 forEach
+    subFilters.forEach((curSubFilter, index) => {
+      if(!filterSet.filterUnit({
+          operator: curSubFilter.operator, 
+          curVal: curVal, 
+          target: curSubFilter.val})){
 
-        if(!filterOpts.filterHandleUnit({
-            operator: curSubFilter.operator, 
-            curVal: curVal, 
-            target: curSubFilter.val})){
-
-          isPassed = false
-          return true // 用于提前结束 forEach
-        }
-      })
-      return isPassed
+        isPassed = false
+        return true // 用于提前结束 forEach
+      }
     })
-    return result
+    return isPassed
   },
-  isSingleColFilterGroup(operator){
+  operatorIsAndOr(operator){
     if(operator === "or" || operator === "and")
       return true
   }
-}
-
-export default {
-  state,
-  mutations
 }

@@ -5,10 +5,9 @@ import Router from 'vue-router'
 
 import 'bulma/css/bulma.css'
 import 'font-awesome/css/font-awesome.min.css'
-// import 'xlsx/dist/xlsx.full.min.js'
 
 import App from './App'
-import filters from "./filters"
+import filtersOfFileList from "./filters/fileList"
 import routes from './routes'
 
 
@@ -17,8 +16,8 @@ Vue.use(Resource)
 Vue.use(Router)
 Vue.config.debug = true
 
-Object.keys(filters).forEach((k) => {
-  Vue.filter(k, filters[k])
+Object.keys(filtersOfFileList).forEach((k) => {
+  Vue.filter(k, filtersOfFileList[k])
 })
 
 const router = new Router()

@@ -2,7 +2,6 @@ import * as types from '../mutation-types'
 
 
 var uploadFiles = window.localStorage.uploadFiles ? JSON.parse(window.localStorage.uploadFiles) : []
-console.log(uploadFiles)
 const state = {
   fileList: uploadFiles, // 最近的excel文件列表（sidebar）
   allFileType: ["all", "xls", "xlsx"], 
@@ -11,9 +10,6 @@ const state = {
 }
 
 const mutations = {
-  [types.CHANGE_SEARCH_VALUE] (state, val) {
-  	state.curSearchType = val
-  },
   [types.TOGGLE_SIDEBAR] (state) {
 	  state.isShowSideBar = !state.isShowSideBar
 	},

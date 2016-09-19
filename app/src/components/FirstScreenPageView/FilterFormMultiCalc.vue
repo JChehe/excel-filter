@@ -54,7 +54,7 @@
 </template>
 
 <script>
-	import { getNumCol } from "../../utils/excel"
+	import { getNumCol } from "../../utils/ExcelSet"
 	import { getFilterOptions } from '../../vuex/getters'
 	import { addFilter } from '../../vuex/actions'
 	export default{

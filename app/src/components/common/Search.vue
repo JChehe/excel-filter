@@ -11,8 +11,7 @@
 </template>
 
 <script>
-	import { changeFileType, changeSearchVal } from '../../vuex/actions'
-	import { getCurSearchVal } from '../../vuex/getters'
+	import { changeSearchVal } from '../../vuex/actions'
 	export default {
 		data(){
 			return {
