@@ -42,5 +42,6 @@ export function getFilterOptions(state) {
 }
 
 export function getColKeys(state) {
-	return state.filterList.excelData.colKeys
+	var curSheet = state.filterList.activeSheet
+	return state.filterList.excelData[curSheet.name + '_headers']
 }

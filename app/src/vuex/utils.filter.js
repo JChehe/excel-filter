@@ -1,3 +1,4 @@
+import { getCharCol, getNumCol} from '../utils/excel'
 export function FilterObj() {
   this.workbook = null,
   this.sheetNameList = null
@@ -8,13 +9,12 @@ FilterObj.prototype = {
   constructor: FilterObj,
 
   init(data) {
-    console.log(typeof data)
+    // console.log(typeof data)
     if(typeof data === 'string'){
       this.readByData(data)
     }else if(typeof data === 'object'){
       this.workbook = data
     }
-    
     this.initData()
     return this
   },
@@ -27,10 +27,21 @@ FilterObj.prototype = {
   initData(){
     this.sheetNameList = this.workbook.SheetNames // 表名列表
 
-    this.initColKeys(this.workbook.Strings)
-      // 插入每个sheet的数据（json格式）
+    // 插入每个sheet的数据（json格式）
     this.sheetNameList.forEach((curSheetName, index) => {
       this[curSheetName] = xlsx.utils.sheet_to_json(this.workbook.Sheets[curSheetName])
+    })
+
+    // 获取表头
+    this.sheetNameList.forEach((curSheetName, index) => {
+      var curSheetData = this.workbook.Sheets[curSheetName]
+      this[curSheetName + '_headers'] = []
+      var scope = this.workbook.Sheets[curSheetName]["!ref"].split(":") // A1 F5
+      var startIndex = getNumCol(extractLetters(scope[0])) // 从 1 开始
+      var endIndex = getNumCol(extractLetters(scope[1]))      
+      for(var i = startIndex; i <= endIndex; i++){
+        this[curSheetName + '_headers'].push(curSheetData[getCharCol(i) + '1'].v)
+      }
     })
   },
   initColKeys(data){
@@ -39,6 +50,8 @@ FilterObj.prototype = {
       this.colKeys.push(item.h)
     })
     console.log(this.colKeys)
+
+
   },
   /*	exportFileByJSON(json ,fileName, writeOpts){
   		xlsx.writeFile(this.jsonToWBForOneSheet(json), fileName)
@@ -60,7 +73,7 @@ FilterObj.prototype = {
     console.log("finalWB", finalWB)
     var wbout = XLSX.write(finalWB, {bookType:'xlsx', bookSST:false, type: 'binary'});
 
-saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName)
+    saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName)
   },
 
   jsonToWBForOneSheet(json, sheetName) {
@@ -89,66 +102,15 @@ saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName)
       }
     }
     return wb
-  },
-  filterByLogicalOperator(sheetName, col, operator, targetNumer) {
-    var sheetData = this[sheetName]
-    var colKeys = Object.keys(this[sheetName][0]) // 通过第一个数据 获取col表头
-    var selectKey = colKeys[col]
-
-    return sheetData.filter((row, index) => {
-      var curCol = parseInt(row[selectKey])
-
-      switch (operator) {
-        case ">":
-          if (curCol > targetNumer) return true
-          break;
-        case "<":
-          if (curCol < targetNumer) return true
-          break;
-        case "<=":
-          if (curCol <= targetNumer) return true
-          break;
-        case ">=":
-          if (curCol >= targetNumer) return true
-          break;
-        case "=":
-          if (curCol === targetNumer) return true
-          break;
-        default:
-          return true
-      }
-    })
-  },
-  // 包含、以*开头、以*结尾、正则表达式
-  filterByCondition(sheetName, col, operator, targetString) {
-    var sheetData = this[sheetName]
-    var colKeys = Object.keys(this[sheetName][0])
-    var selectKey = colKeys[col]
-    var regExp = ""
-    if (operator === "regExp") regExp = new RegExp(targetString, "ig")
-    return sheetData.filter((row, index) => {
-      var curCol = row[selectKey]
-
-      switch (operator) {
-        case "contain":
-          return curCol.includes(targetString);
-          break;
-        case "startsWith":
-          return curCol.startsWith(targetString);
-          break;
-        case "endsWith":
-          return curCol.endsWith(targetString);
-          break;
-        case "regExp":
-          return curCol.match(regExp)
-          break;
-        default:
-          return true
-      }
-    })
   }
 }
 
+// 提取字母
+function extractLetters(str) {
+  return str.replace(/[^a-zA-Z]+/g, '')
+}
+
+    
 function s2ab(s) {
   var buf = new ArrayBuffer(s.length);
   var view = new Uint8Array(buf);

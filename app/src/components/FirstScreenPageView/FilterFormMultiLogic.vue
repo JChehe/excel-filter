@@ -90,8 +90,8 @@
 	export default {
 		data(){
 			return {
-				operatorVal: "",
-				operatorCol: '', // 最终会转为数组
+				operatorVal: "4",
+				operatorCol: '5,6', // 最终会转为数组
 				operator: ">",
 				subFilters: [],
 				subFilterOperator: "",
@@ -177,13 +177,18 @@
 				}
 				console.log(curCol)
 
-				if(opVal.length === 0 || !this.isNotSingleLogicGroupOperator && subFilters.length === 0) {
+				if(this.isNotSingleLogicGroupOperator && opVal.length === 0) {
 					alert("3.1请填写完整")
 					return
 				}
 
+				if(!this.isNotSingleLogicGroupOperator && this.subFilters.length === 0){
+					alert("3.2请填写完整")
+					return
+				}
+
 				if(curCol.length > 2){
-					alert("多列运算逻辑只能选择两列")
+					alert("多列运算逻辑只能填写两列，它会取指定两列范围内的所有列（包含自身）")
 					this.operatorCol = ""
 					return 
 				}
@@ -202,8 +207,7 @@
 					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
 				}
 
-				console.log(filterWords)
-				
+				console.log(this.subFilters)
 				var tempCols = []
 				for(var i = +curCol[0], len = +curCol[1]; i <= len; i++){
 					tempCols.push(i - 1)

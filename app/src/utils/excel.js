@@ -13,10 +13,10 @@ export function getCharCol(n) {
   return s
 }
 
+// 1 <--> A
 
 export function getNumCol(s) {
   if (!s) return 0
-  console.log
   var n = 0
   for (var i = s.length - 1, j = 1; i >= 0; i--, j *= 26) {
     var c = s[i].toUpperCase()

@@ -30,6 +30,9 @@ const state = {
   		char: "=",
   		words: "等于"
   	},{
+      char: "!=",
+      words: "不等于"
+    },{
   		char: "contain",
   		words: "包含"
   	},{
@@ -49,7 +52,7 @@ const state = {
       words: "或"
     },{
       char: "and",
-      words: "与"
+      words: "且"
     }
   ]
 }
@@ -122,6 +125,8 @@ const mutations = {
   [types.SET_EXCEL_DATA] (state, data) {
   	state.excelData = new utils.FilterObj().init(data)
   	initFilterState(state, state.excelData.sheetNameList)
+
+    console.log("!!!!", state.excelData)
   },
   [types.SET_ACTIVE_SHEET] (state, index) {
   	state.activeSheet = {
@@ -143,7 +148,7 @@ function initFilterState(state, sheetNames) {
 
 var filterOpts = {
   mathOperaArr: [">", "<", ">=", "<=", "="],
-  conditionArr: ["contain", "notContain", "startsWith", "endsWith", "regexp"],
+  conditionArr: ["!=", "contain", "notContain", "startsWith", "endsWith", "regexp"],
 
   filteredData(args) {
     var {sheetData, filterCol, operator, target, subFilters, colOperator} = args
@@ -152,7 +157,7 @@ var filterOpts = {
     if(this.isSingleColFilterGroup(operator)) {
       if(filterCol instanceof Array){
         console.log("第3.2种情况")
-        return true
+        return this.filterByMultiGroup({sheetData, filterCol, operator, subFilters})
       }else{
         console.log("第1.2种情况")
         return this.filterBySingleLogicGroup({sheetData, filterCol, operator, subFilters})
@@ -169,35 +174,158 @@ var filterOpts = {
         }
       }else{
         console.log("第1.1种情况")
+        console.log({sheetData, filterCol, operator, target})
         return this.filterByOneOperator({sheetData, filterCol, operator, target})
       }
     }
   },
+  filterByMultiGroup(args) {
+    var {sheetData, filterCol, operator, subFilters} = args
+    if(operator === "or") {
+      return this.filterByMultiOr({sheetData, subFilters, filterCol})
+    }else if(operator === "and"){
+      return this.filterByMultiAnd({sheetData, subFilters, filterCol})
+    }else{
+      console.log("filterByMultiGroup", "未匹配到operator")
+    }
+  },
+  filterByMultiOr(args) {
+    var { sheetData, filterCol, subFilters } = args
+    var colKeys = state.excelData.colKeys
+    var result = sheetData.filter((row, index) => {
+      return this.filterByMultiOrHandle({
+        rowData: row,
+        filterCol: filterCol,
+        subFilters,
+        colKeys
+      })
+    })
+
+    return result
+  },
+  filterByMultiOrHandle(args){
+    var {rowData, filterCol, subFilters, colKeys} = args
+    var isRowPassed = false
+
+    for(var i = 0, len = filterCol.length; i < len; i++) {
+      var selectKey = filterCol[i]
+      var curKey = colKeys[selectKey]
+
+      var isCurColPassed = this.filterByMultiOrHandleHandle({
+        rowData: rowData,
+        subFilters: subFilters,
+        filterCol: selectKey
+      })
+      if(isCurColPassed) {
+        isRowPassed = true
+        break
+      }
+    }
+    return isRowPassed
+  },
+  filterByMultiOrHandleHandle(args){
+    var { rowData, subFilters, filterCol } = args
+    var colKeys = state.excelData.colKeys
+    var selectKey = colKeys[filterCol]
+
+      var curVal = rowData[selectKey]
+      var isPassed = false
+      subFilters.forEach((curSubFilter, index) => {
+        if(filterOpts.filterHandleUnit({
+            operator: curSubFilter.operator, 
+            curVal: curVal, 
+            target: curSubFilter.val})){
+
+          isPassed = true
+          return true
+        }
+      })
+      return isPassed
+  },
+  filterByMultiAnd(args) {
+    var { sheetData, filterCol, subFilters } = args
+    var colKeys = state.excelData.colKeys
+    var result = sheetData.filter((row, index) => {
+      return this.filterByMultiOrHandle({
+        rowData: row,
+        filterCol: filterCol,
+        subFilters,
+        colKeys
+      })
+    })
+
+    return result
+  },
+  filterByMultiAndHandle(args){
+    var {rowData, filterCol, subFilters, colKeys} = args
+    var isRowPassed = false
+
+    for(var i = 0, len = filterCol.length; i < len; i++) {
+      var selectKey = filterCol[i]
+      var curKey = colKeys[selectKey]
+
+      var isCurColPassed = this.filterByMultiAndHandleHandle({
+        rowData: rowData,
+        subFilters: subFilters,
+        filterCol: selectKey
+      })
+      if(isCurColPassed) {
+        isRowPassed = true
+        break
+      }
+    }
+    return isRowPassed
+  },
+  filterByMultiAndHandleHandle(args){
+    var { rowData, subFilters, filterCol } = args
+    var colKeys = state.excelData.colKeys
+    var selectKey = colKeys[filterCol]
+
+      var curVal = rowData[selectKey]
+      var isPassed = true // 用于提前结束 forEach
+      subFilters.forEach((curSubFilter, index) => {
+
+        if(!filterOpts.filterHandleUnit({
+            operator: curSubFilter.operator, 
+            curVal: curVal, 
+            target: curSubFilter.val})){
+
+          isPassed = false
+          return true // 用于提前结束 forEach
+        }
+      })
+      return isPassed
+  },
   filterByOneOperator(args){
     var {sheetData, filterCol, operator, target} = args
-    var colKeys = Object.keys(sheetData[0]) // 通过第一个数据 获取col表头
+    var colKeys = state.excelData.colKeys
     var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
       var curVal = row[selectKey]
-      return this.filterHandleUnit({operator, curVal, target})
+      console.log("curVal", row[selectKey])
+      // 过滤掉空表格
+      if(curVal == undefined)
+        return false
+      else
+        return this.filterHandleUnit({operator, curVal, target})
     })
     return result
   },
   // 罗列逻辑运算逻辑
   filterByMultiLogic(args) {
     var { sheetData, filterCol, operator, target } = args
-    var colKeys = Object.keys(sheetData[0])
+    var colKeys = state.excelData.colKeys
     console.log(sheetData)
-    sheetData.filter((row, index) => {
+    /*sheetData.filter((row, index) => {
       console.log("row", row)
       return true
-    })
+    })*/
     var result = sheetData.filter( (row, index) => {
       // 以行为单位，注：包含首尾列
       return this.filterByMultiColOr({
         rowData: row,
-        filterCols: filterCol,
+        filterCol: filterCol,
         operator,
         target,
         colKeys
@@ -208,11 +336,11 @@ var filterOpts = {
     return result
   },
   filterByMultiColOr(args) {
-    var { rowData, filterCols, operator, target, colKeys } = args
+    var { rowData, filterCol, operator, target, colKeys } = args
     var isRowPassed = false
 
-    for(var i = 0, len = filterCols.length; i < len; i++) {
-      var selectKey = filterCols[i]
+    for(var i = 0, len = filterCol.length; i < len; i++) {
+      var selectKey = filterCol[i]
       var curKey = colKeys[selectKey]
       var isCurColPassed = this.filterHandleUnit({
         operator,
@@ -231,7 +359,7 @@ var filterOpts = {
   filterBySingleLogic(args){
     // 此处 filterCol 是数组
     var { sheetData, filterCol, colOperator, operator, target } = args
-    var colKeys = Object.keys(sheetData[0])
+    var colKeys = state.excelData.colKeys
     console.log("sheetData===", sheetData)
     var result = sheetData.filter((row, index) => {
       console.log("row===", row)
@@ -303,9 +431,11 @@ var filterOpts = {
       case "<": return (curVal < target); break;
       case "<=": return (curVal <= target); break;
       case ">=": return (curVal >= target); break;
-      case "=": return (curVal === target); break;
+      case "=": console.log("==", curVal, "=", target, "=", curVal == target);return (curVal == target); break;
       // 上面是逻辑操作符
       // 下面是字符串操作符
+      // 因为!=可用于字符串的对比，因此不放在逻辑操作符内
+      case "!=": console.log(curVal); return (curVal != target); break; 
       case "contain": return curVal.includes(target); break;
       case "notContain": return !curVal.includes(target); break;
       case "startsWith": return curVal.startsWith(target); break;
@@ -329,7 +459,7 @@ var filterOpts = {
   },
   filterByOr(args){
     var { sheetData, subFilters, filterCol } = args
-    var colKeys = Object.keys(sheetData[0])
+    var colKeys = state.excelData.colKeys
     var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {
@@ -347,11 +477,10 @@ var filterOpts = {
       })
       return isPassed
     })
-    return result
   },
   filterByAnd(args){
     var { sheetData, subFilters, filterCol } = args
-    var colKeys = Object.keys(sheetData[0])
+    var colKeys = state.excelData.colKeys
     var selectKey = colKeys[filterCol]
 
     var result = sheetData.filter((row, index) => {

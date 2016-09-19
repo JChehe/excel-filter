@@ -151,7 +151,13 @@
 						return true
 					}
 				})
-				if(opVal.length === 0 || !this.isNotSingleLogicGroupOperator && subFilters.length === 0){
+
+				if(!this.isNotSingleLogicGroupOperator && subFilterVal.trim().length === 0){
+					alert("第1.2种表格 未填写完整")
+					return
+				}
+
+				if(!this.isNotSingleLogicGroupOperator){
 					this.subFilters.push({
 						operator: subFilterOperator,
 						val: subFilterVal,
@@ -160,8 +166,6 @@
 
 					this.subFilterOperator = ">" 
 					this.subFilterVal = ""
-				}else{
-					alert("第1.2种表格 未填写完整")
 				}
 			},
 			removeSubFilter(index) {
@@ -177,7 +181,8 @@
 				var opVal = this.operatorVal.trim()
 				var subFilters = this.subFilters
 
-				if(opVal.length === 0 || this.activeFilterFormIndex && subFilters.length === 0) {
+				if(this.isNotSingleLogicGroupOperator && opVal.length === 0 || 
+					!this.isNotSingleLogicGroupOperator && this.subFilters.length === 0) {
 					alert("请填写完整")
 					return
 				}
@@ -188,15 +193,13 @@
 					for(var i = 0, len = subFilters.length; i < len; i++){
 						var curFilter = this.subFilters[i]
 						var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
-						tempStr += i !== len - 1 ? `${primitiveFilterWords} 或 ` : `${primitiveFilterWords}`
+						tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords} ` : `${primitiveFilterWords}`
 					}
 					filterWords = preStr + tempStr
 				}else{
 					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
 				}
 
-				console.log(filterWords)
-				
 				filterObj = {
 					col: curCol - 1,
 					operator: this.operator,

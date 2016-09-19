@@ -13,20 +13,19 @@
 			</ul>
 		</div>
 		<!-- 根据cheetTittle 动态切换数据 -->
-
-		<div v-if="!excelData.sheetNameList"
-			class="drop-area content" 
-			:class="{isShowSideBar: !sideBarStatus}"
-			@drop.prevent.stop="dropHandler" 
-			>
-			<p>拖拽一个Excel文件到这里即可完成上传</p>
+		<div :class="['tabs-body', {isShowSideBar: !sideBarStatus}]">
+			<div class="drop-area content" 
+				v-show="!excelData.sheetNameList"
+				@drop.prevent.stop="dropHandler" 
+				>
+				<p>拖拽一个Excel文件到这里即可完成上传</p>
+			</div>
+			<sheet-of-excel
+				v-if="excelData.sheetNameList"
+				:sheet-data="filteredData[activeSheet.name]">
+				
+			</sheet-of-excel>
 		</div>
-		<sheet-of-excel v-else
-			:class="{isShowSideBar: !sideBarStatus}"
-			v-for="sheetName in excelData.sheetNameList" 
-			:sheet-data="filteredData[sheetName]" 
-			v-if="$index === activeSheet.index">
-		</sheet-of-excel>
 	</div>
 </template>
 
@@ -58,7 +57,6 @@
 		created(){
 			setTimeout(() => {
 				var dropArea = document.querySelector(".drop-area")
-				
 				dropArea.addEventListener("dragenter", dragoverHandler, false)
 				dropArea.addEventListener("dragover", dragoverHandler, false)
 				function dragoverHandler(e){
@@ -116,19 +114,31 @@
 	.excel-cheet-nav ul{
 		padding-left: 5px;
 	}
-	.drop-area, .table-responsive{
+	.tabs-body{
 		width: calc(100vw - 295px);
 		display: block;
 		overflow: auto;
 		height:calc(100vh - 226px);
 	}
+
+	.tabs-body.isShowSideBar{
+		width: calc(100vw - 24px)
+	}
 	.drop-area{
 		border: 3px dashed #69707a;
-		display: table-cell;
 		font-size: 18px;
+		position: relative;
 		vertical-align: middle;
 	}
-	.table-responsive.isShowSideBar, .drop-area.isShowSideBar{
-		width: calc(100vw - 24px)
+	.drop-area>p{
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+	.tabs-body>*{
+		display: block;
+		width: 100%;
+		height: 100%;
 	}
 </style>

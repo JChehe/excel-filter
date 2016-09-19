@@ -57,7 +57,7 @@
 				return this.colKeys.length + 1
 			},
 			rawNum (){
-				return Math.max(this.sheetData.length) 
+				return this.sheetData.length
 			}
 		},
 		methods: {
