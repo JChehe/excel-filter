@@ -8,13 +8,14 @@
 					<th v-for="col in colNum">{{ getCharCol(col) }}</th>
 				</tr>
 			</thead>
-			<tbody>
-				<tr>
+			<tbody id="excelBody">
+				<!-- <tr>
 					<td>1</td>
 					<td v-for="col in colKeys">
 						{{ col }}
 					</td>
-				</tr>
+				</tr> -->
+				<!-- 
 				<tr v-for="row in rawNum">
 					<td v-for="col in colKeys.length"
 						track-by="$index"
@@ -27,9 +28,12 @@
 						:title="(row+2) + `行` + getCharCol(index+1) + '列'">
 						{{ sheetData[row][col] }}
 					</td>
-				</tr>
+				</tr> -->
+
 			</tbody>
+
 		</table>
+		<!-- {{generateHTMLString}} -->
 	</div>
 </template>
 
@@ -54,13 +58,55 @@
 				}
 			}
 		},
+		watch: {
+			sheetData(){
+				document.getElementById("excelBody").innerHTML = this.generateHTMLString
+			}
+		},
+		created() {
+			setTimeout(() => {
+				document.getElementById("excelBody").innerHTML = this.generateHTMLString
+				
+			},1)
+		},
 		computed: {
 			colNum (){
-				console.log("this.colKeys.length", this.colKeys.length)
+				// console.log("this.colKeys.length", this.colKeys.length)
 				return this.colKeys.length + 1
 			},
 			rawNum (){
+				console.log(this.colKeys.length * this.sheetData.length)
 				return this.sheetData.length
+			},
+			generateHTMLString(){
+				var sheetData = this.sheetData
+
+				var resultHeadStr = "<tr><td>1</td>"
+				this.colKeys.forEach((row, index) => {
+					resultHeadStr += `<td>${row}</td>`
+				})
+				resultHeadStr += "</tr>"
+
+				var resultBodyStr = ""
+
+				for(var i = 0, len = this.rawNum; i < len; i++){
+					var resultTrStr = "<tr>"
+					this.colKeys.forEach((key, index) => {
+						if(index === 0){
+							resultTrStr += `<td>${i + 2}</td>`
+						}
+					})
+
+					this.colKeys.forEach((col, index) => {
+						var val = sheetData[i][col]
+						if(val == undefined) val = ""
+						resultTrStr += `<td title="${i + 2}行${this.getCharCol(index + 1)}列">${val}</td>`
+					})
+					resultTrStr += "</tr>"
+					resultBodyStr += resultTrStr
+				}
+				// console.log((resultHeadStr + resultBodyStr))
+				return (resultHeadStr + resultBodyStr)
 			}
 		},
 		methods: {
@@ -72,6 +118,10 @@
 </script>
 
 <style scoped>
+	table {
+		/* table不卡起决定性作用 */
+		transform: translate3d(0,0,0);
+	}
 	.table-responsive table{
 		width: 100%;
 		max-width: 100%
