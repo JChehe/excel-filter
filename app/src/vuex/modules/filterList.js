@@ -103,7 +103,11 @@ const mutations = {
   },
 
   [types.EXPORT_FILE] (state, val) {
-    state.excelData.exportFileByWB(state.filteredData, "过滤后的Excel.xlsx")
+    state.excelData.exportFileByWB({
+      filteredData: state.filteredData, 
+      excelData: state.excelData, 
+      fileName: "过滤后的Excel.xlsx"
+    })
   }
 }
 
@@ -299,15 +303,22 @@ var filterSet = {
   // 计算每行是否符合要求
   calcMultiCol(args){
     var { row, colOperator, filterCol } = args
-    var calcResult = 0
-    var colKeys = Object.keys(row)
-
+    var calcResult
+    var colKeys = state.excelData[ state.activeSheet.name + "_headers"]
     if(!colOperator.includes("time")){
+      // 根据第一个值能否转为数字，初始化calcResult为相应类型
+      var calcResult = !isNaN(+row[colKeys[filterCol[0]]]) ? 0 : ""
       for(var i = 0, len = filterCol.length; i < len; i++){
-        var selectKey = colKeys[i]
-        var curVal = +row[selectKey]
+        var selectKey = colKeys[filterCol[i]]
+        var curVal
+        if(row[selectKey] == undefined){
+          curVal = calcResult instanceof String ? "" : 0
+        }else{
+          curVal = !isNaN(+row[selectKey]) ? +row[selectKey] : row[selectKey]
+        }
+        
         switch(colOperator){
-          case "+": calcResult += curVall; break;
+          case "+": calcResult += curVal; break;
           case "-": calcResult -= curVal; break;
           case "*": calcResult *= curVal; break;
           case "/": calcResult /= curVal; break;
@@ -322,6 +333,7 @@ var filterSet = {
       // minutes
       calcResult = Math.floor(diff/60)
     }
+    console.log("calcResult", calcResult)
     return calcResult
   },
   

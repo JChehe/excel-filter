@@ -83,14 +83,15 @@ Excel.prototype = {
       }
     })
   },
-  exportFileByWB(data, fileName, writeOpts) {
+  exportFileByWB(args) {
+    var {filteredData, excelData, fileName, writeOpts} = args
     var finalWB = {
       SheetNames: [],
       Sheets: {}
     }
     var sheetNameList = this.sheetNameList
     sheetNameList.forEach((sheetName, i) => {
-      var wbTem = this.jsonToWBForOneSheet(data[sheetName], (sheetName + "_headers"), sheetName)
+      var wbTem = this.jsonToWBForOneSheet(filteredData[sheetName], excelData[sheetName + "_headers"], sheetName)
       finalWB.SheetNames.push(wbTem.SheetNames[0])
       Object.assign(finalWB.Sheets, {
         [sheetName]: wbTem["Sheets"][sheetName]

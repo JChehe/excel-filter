@@ -121,12 +121,10 @@
 
 				for(var i = 0, len = curCol.length; i < len; i++){
 					var cCol = curCol[i]
-					console.log(cCol)
 					if(cCol.match(/[a-z]/ig)){
 						curCol.splice(i, 1, getNumCol(cCol))
 					}
 				}
-				console.log(curCol)
 
 				if(curCol.length === 0 || opVal.length === 0) {
 					alert("第2种表格 请填写完整")
@@ -143,7 +141,10 @@
 
 				filterWords = preStr + this.getFilterWordPrimitive(operator, colOperatorWords, operatorWords, opVal)
 
-				console.log(filterWords)
+				// 减一处理，以符合计算机的逻辑
+				curCol.forEach((item, index) => {
+					return curCol[index] = item - 1
+				})
 
 				filterObj = {
 					col: curCol,
@@ -192,5 +193,7 @@
 </script>
 
 <style>
-	
+	form .table{
+		margin-bottom: 0
+	}
 </style>
