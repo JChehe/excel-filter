@@ -39,6 +39,7 @@
 						var data = e.target.result
 						this.setExcelData(data)
 						this.setActiveSheet(0)
+						console.log("第四阶段")
 					}
 					reader.readAsBinaryString(f)
 				}

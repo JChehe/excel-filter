@@ -56,6 +56,7 @@
 		},
 		computed: {
 			colNum (){
+				console.log("this.colKeys.length", this.colKeys.length)
 				return this.colKeys.length + 1
 			},
 			rawNum (){
@@ -83,5 +84,8 @@
 	}
 	table thead tr th, table thead th:hover,table tbody tr td:first-child, table tbody tr td:first-child:hover{
 		background-color: #eee;
+	}
+	table tbody>tr:first-child td{
+		white-space: nowrap;
 	}
 </style>

@@ -94,7 +94,7 @@
 
 <script>
 	import { addFilter } from '../../vuex/actions'
-	import { getActiveSheet, getFilterOptions, getExcelData } from '../../vuex/getters'
+	import { getActiveSheet, getColKeys, getFilterOptions, getExcelData } from '../../vuex/getters'
 	import { getCharCol } from '../../utils/ExcelSet'
 
 	export default {
@@ -112,7 +112,8 @@
 			getters: {
 				activeSheet: getActiveSheet,
 				filterOptions: getFilterOptions,
-				excelData: getExcelData
+				excelData: getExcelData,
+				colKeys: getColKeys
 			},
 			actions: {
 				addFilter
@@ -120,8 +121,9 @@
 		},
 		computed: {
 			colNum(){
-				if(this.excelData[this.activeSheet.name])
-					return this.excelData[this.activeSheet.name].length
+				if(this.colKeys){
+					return this.colKeys.length
+				}
 				else
 					return 0
 			},

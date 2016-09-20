@@ -63,14 +63,21 @@ Excel.prototype = {
     this.workbook = xlsx.readFile(filename)
   },
   initData(){
+    console.log("第一个阶段开始，sheetNameList")
     // 表名列表
     this.sheetNameList = this.workbook.SheetNames 
+    console.log("第一个阶段结束，sheetNameList")
+
+    console.log("第二个阶段开始，sheet_to_json")
 
     // 插入每个sheet的数据（json格式）
     this.sheetNameList.forEach((curSheetName, index) => {
       this[curSheetName] = xlsx.utils.sheet_to_json(this.workbook.Sheets[curSheetName])
     })
+    console.log("第二个阶段结束，sheet_to_json")
 
+
+    console.log("第三个阶段开始，表头初始化")
     // 获取表头
     this.sheetNameList.forEach((curSheetName, index) => {
       var curSheetData = this.workbook.Sheets[curSheetName]
@@ -82,6 +89,9 @@ Excel.prototype = {
         this[curSheetName + '_headers'].push(curSheetData[getCharCol(i) + '1'].v)
       }
     })
+    console.log("this", this)
+    console.log("第三个阶段结束，表头初始化")
+
   },
   exportFileByWB(args) {
     var {filteredData, excelData, fileName, writeOpts} = args

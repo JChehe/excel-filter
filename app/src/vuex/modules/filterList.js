@@ -63,6 +63,7 @@ const mutations = {
   [types.SET_EXCEL_DATA] (state, data) {
     state.excelData = new ExcelSet.Excel().init(data)
     initFilterState(state, state.excelData.sheetNameList)
+    console.log("第4阶段")
   },
 
   [types.ADD_FILTER] (state, filter) {

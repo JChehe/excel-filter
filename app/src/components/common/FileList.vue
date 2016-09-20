@@ -73,6 +73,7 @@
 					      name: pathModule.basename(path),
 					      extname: pathModule.extname(path)
 					    })
+							console.log("第五阶段")
 						}else{
 							var isDelConfirm = window.confirm("当前文件不存在，是否删除该记录？")
 							if(isDelConfirm) {
