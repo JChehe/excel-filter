@@ -45,6 +45,7 @@
 						<div v-else>
 							<!-- 已添加的“和”“或”筛选条件 -->
 							<div v-for="(index, subFilter) in subFilters" 
+								title="已添加的子筛选条件不能修改，只能删除"
 								class="subFilter control has-addons has-addons-centered">
 							  <span class="select">
 							    <select>
@@ -235,7 +236,9 @@
 				switch(operator){
 					case 'startsWith': ;
 					case 'ends': primitiveFilterWords = `的${operatorWords}为“${val}”`;break;
-					case 'regexp': primitiveFilterWords = `应用了正则表达式"${val}"`;break;
+					case 'regexp': 
+						val = val.replace(/\//ig, "\\/")
+						primitiveFilterWords = `应用了正则表达式"/${val}/ig"`;break;
 					default: primitiveFilterWords = `${operatorWords}"${val}"`;
 				}
 				return primitiveFilterWords

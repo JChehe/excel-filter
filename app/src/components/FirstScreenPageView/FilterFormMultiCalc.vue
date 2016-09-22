@@ -85,13 +85,16 @@
 				},{
 					char: "%",
 					words: "求余"
-				},{
+				}/*,{
 					char: "+(time)",
 					words: "时间相加"
-				},{
+				}*/,{
 					char: "-(time)",
 					words: "时间相减"
-				}]
+				}/*,{
+					char: "+()",
+					words: "字符串拼接"
+				}*/]
 			}
 		},
 		vuex: {
@@ -118,13 +121,16 @@
 				
 				var filterObj = {}
 				var filterWords = ""
-				var curCols = this.operatorCol.trim().split(/,?，?/)
+				var curCols = this.operatorCol.trim()
 				var operator = this.operator
 				var operatorWords = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
 				var colOperatorSelect = this.colOperatorSelect
 				var colOperatorWords = this.getColOperatorWords(colOperatorSelect)
-
+				// 去除两边的逗号
+				curCols = curCols.replace(/^[，*,*]*/ig, "").replace(/[，*,*]*$/ig, "")
+				// 切割为数组
+				curCols = curCols.split(/,?，?/)
 
 				for(var i = 0, len = curCols.length; i < len; i++){
 					var cCol = curCols[i]
@@ -135,7 +141,11 @@
 
 				if(curCols.length === 0 || opVal.length === 0) {
 					alert("第2种表格 请填写完整")
-
+					return
+				}
+				console.log("curCols", curCols)
+				if(curCols.length < 2){
+					alert("至少填写两列")
 					return
 				}
 
@@ -192,7 +202,7 @@
 				switch(operator){
 					case 'startsWith': ;
 					case 'ends': primitiveFilterWords = `的${operatorWords}为“${val}”`;break;
-					case 'regexp': primitiveFilterWords = `应用了正则表达式"${val}"`;break;
+					case 'regexp': primitiveFilterWords = `应用了正则表达式"/${val}/ig"`;break;
 					default: 
 						primitiveFilterWords = `${operatorCol}${operatorWords}"${val}"`;
 						if(this.colOperatorSelect.includes("time")) primitiveFilterWords += "分钟"

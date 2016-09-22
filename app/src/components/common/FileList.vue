@@ -101,6 +101,9 @@
       -ms-flex-pack: start;
         justify-content: flex-start;
 	}
+	.panel-tabs a{
+		font-size: 12px;
+	}
 	.file-panel{
 		position: relative;
 		border: 0;

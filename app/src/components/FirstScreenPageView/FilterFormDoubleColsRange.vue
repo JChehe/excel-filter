@@ -36,8 +36,9 @@
 						<!-- 是“或”和“与”的情况下 -->
 						<div v-else>
 							<!-- 已添加的“和”“或”筛选条件 -->
-							<div class="subFilter control has-addons has-addons-centered"
-								v-for="(index, subFilter) in subFilters">
+							<div v-for="(index, subFilter) in subFilters"
+								class="subFilter control has-addons has-addons-centered"
+								title="已添加的子筛选条件不能修改，只能删除">
 							  <span class="select">
 							    <select>
 							    	<option :value="subFilter.operator">
@@ -86,7 +87,7 @@
 	import filterButton from './filterButton'
 	import { addFilter, setFilterStatus } from '../../vuex/actions'
 	import { getActiveSheet, getFilterOptions, getExcelData } from '../../vuex/getters'
-	import { getCharCol } from '../../utils/ExcelSet'
+	import { getCharCol, getNumCol } from '../../utils/ExcelSet'
 
 	export default {
 		components: {
@@ -115,13 +116,15 @@
 		},
 		computed: {
 			colNum(){
-				if(this.excelData[this.activeSheet.name])
-					return this.excelData[this.activeSheet.name].length
+				var activeSheetName = this.activeSheet.name
+				if(this.excelData[activeSheetName])
+					return this.excelData[activeSheetName].length
 				else
 					return 0
 			},
 			isNotSingleLogicGroupOperator(){
-				return this.operator !== "or" && this.operator !== "and"
+				var operator = this.operator
+				return operator !== "or" && operator !== "and"
 			},
 			singleLogicGroupOperators(){
 				return this.filterOptions.filter((opt, index) => {
@@ -133,10 +136,11 @@
 			}
 		},
 		methods: {
+			getNumCol,
 			getCharCol,
 			addSubFilter(index) {
-				var subFilterOperator = this.subFilterOperator
-				var subFilterVal = this.subFilterVal
+				var subFilterOperator = this.subFilterOperator.trim()
+				var subFilterVal = this.subFilterVal.trim()
 				var subFilterWords = ""
 				
 				this.filterOptions.forEach((opt, index) => {
@@ -165,21 +169,26 @@
 			addFilterHandler() {
 				var filterObj = {}
 				var filterWords = ""
-				// var curCol = this.operatorCol
-				var curCol = this.operatorCol.trim().split(/,?，?/)
+				// var curCols = this.operatorCol
+				var curCols = this.operatorCol.trim()
 				var operator = this.operator
 				var operatorWords = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
 				var subFilters = this.subFilters
 
-				for(var i = 0, len = curCol.length; i < len; i++){
-					var cCol = curCol[i]
+				// 去除两边的逗号
+				curCols = curCols.replace(/^[，*,*]*/ig, "").replace(/[，*,*]*$/ig, "")
+				// 切割为数组
+				curCols = curCols.split(/,?，?/)
+
+				for(var i = 0, len = curCols.length; i < len; i++){
+					var cCol = curCols[i]
 					console.log(cCol)
 					if(cCol.match(/[a-z]/ig)){
-						curCol.splice(i, 1, getNumCol(cCol))
+						curCols.splice(i, 1, getNumCol(cCol))
 					}
 				}
-				console.log(curCol)
+				console.log(curCols)
 
 				if(this.isNotSingleLogicGroupOperator && opVal.length === 0) {
 					alert("3.1请填写完整")
@@ -190,8 +199,10 @@
 					alert("3.2请填写完整")
 					return
 				}
-
-				if(curCol.length > 2){
+				if(curCols.length < 2){
+					alert("至少填写两列")
+					return
+				}else if(curCols.length > 2){
 					alert("多列运算逻辑只能填写两列，它会取指定两列范围内的所有列（包含自身）")
 					this.operatorCol = ""
 					return 
@@ -203,7 +214,7 @@
 
 				setTimeout(()=>{
 
-					var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值中，存在至少一个`
+					var preStr = `第${getCharCol(curCols[0])}至第${getCharCol(curCols[1])}列范围内的值中，存在至少一个`
 
 					if(!this.isNotSingleLogicGroupOperator) {
 						var tempStr = ""
@@ -219,13 +230,13 @@
 
 					console.log(this.subFilters)
 					var tempCols = []
-					for(var i = +curCol[0], len = +curCol[1]; i <= len; i++){
+					for(var i = +curCols[0], len = +curCols[1]; i <= len; i++){
 						tempCols.push(i - 1)
 					}
-					curCol = tempCols
-					console.log("根据首尾两元素获得它们之间的所有元素，并且所有元素进行减一处理", curCol)
+					curCols = tempCols
+					console.log("根据首尾两元素获得它们之间的所有元素，并且所有元素进行减一处理", curCols)
 					filterObj = {
-						col: curCol,
+						col: curCols,
 						operator: this.operator,
 						value: opVal,
 						filterWords: filterWords,
@@ -246,7 +257,9 @@
 				switch(operator){
 					case 'startsWith': ;
 					case 'ends': primitiveFilterWords = `的${operatorWords}为“${val}”`;break;
-					case 'regexp': primitiveFilterWords = `应用了正则表达式"${val}"`;break;
+					case 'regexp':
+						val = val.replace(/\//ig, "\\/")
+						primitiveFilterWords = `应用了正则表达式"/${val}/ig"`;break;
 					default: primitiveFilterWords = `${operatorWords}"${val}"`;
 				}
 				return primitiveFilterWords

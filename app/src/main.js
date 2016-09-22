@@ -5,7 +5,6 @@ import Router from 'vue-router'
 
 import 'bulma/css/bulma.css'
 import 'font-awesome/css/font-awesome.min.css'
-
 import App from './App'
 import filtersOfFileList from "./filters/fileList"
 import routes from './routes'
