@@ -3,7 +3,7 @@
 		<table class="table">
 			<thead>
 				<tr>
-					<th>选择列</th>
+					<th>选择一列</th>
 					<th>逻辑操作符</th>
 					<th>逻辑操作的值</th>
 					<th></th>
@@ -84,7 +84,7 @@
 						</div>
 					</td>
 					<td>
-						<button class="button">确定</button>
+						<filter-button :filter-status="filterStatus"></filter-button>
 					</td>
 				</tr>
 			</tbody>
@@ -93,11 +93,15 @@
 </template>
 
 <script>
-	import { addFilter } from '../../vuex/actions'
+	import filterButton from './filterButton'
+	import { addFilter, setFilterStatus } from '../../vuex/actions'
 	import { getActiveSheet, getColKeys, getFilterOptions, getExcelData } from '../../vuex/getters'
 	import { getCharCol } from '../../utils/ExcelSet'
 
 	export default {
+		components: {
+			filterButton
+		},
 		data(){
 			return {
 				operatorVal: "",
@@ -116,7 +120,8 @@
 				colKeys: getColKeys
 			},
 			actions: {
-				addFilter
+				addFilter,
+				setFilterStatus
 			}
 		},
 		computed: {
@@ -174,7 +179,7 @@
 				this.subFilters.splice(index, 1)
 			},
 			addFilterHandler() {
-
+					
 				var filterObj = {}
 				var filterWords = ""
 				var curCol = this.operatorCol
@@ -186,34 +191,43 @@
 				if(this.isNotSingleLogicGroupOperator && opVal.length === 0 || 
 					!this.isNotSingleLogicGroupOperator && this.subFilters.length === 0) {
 					alert("请填写完整")
+					this.setFilterStatus(0)
 					return
 				}
-				var preStr = `第${curCol}列的值`
 
-				if(!this.isNotSingleLogicGroupOperator) {
-					var tempStr = ""
-					for(var i = 0, len = subFilters.length; i < len; i++){
-						var curFilter = this.subFilters[i]
-						var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
-						tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords} ` : `${primitiveFilterWords}`
+				this.$nextTick(() => {
+					this.setFilterStatus(1)
+				})
+
+				// 延迟是为了让“filterForm的提交按钮能作出响应（不会因为卡死了不能加入loading动画，加入web Worker后可取消该延时器）”
+				setTimeout(()=>{
+					var preStr = `第${curCol}列的值`
+
+					if(!this.isNotSingleLogicGroupOperator) {
+						var tempStr = ""
+						for(var i = 0, len = subFilters.length; i < len; i++){
+							var curFilter = this.subFilters[i]
+							var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
+							tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords} ` : `${primitiveFilterWords}`
+						}
+						filterWords = preStr + tempStr
+					}else{
+						filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
 					}
-					filterWords = preStr + tempStr
-				}else{
-					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
-				}
 
-				filterObj = {
-					col: curCol - 1,
-					operator: this.operator,
-					value: opVal,
-					filterWords: filterWords,
-					subFilters: this.subFilters
-				}
+					filterObj = {
+						col: curCol - 1,
+						operator: this.operator,
+						value: opVal,
+						filterWords: filterWords,
+						subFilters: this.subFilters
+					}
 
-				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
-				this.addFilter(filterObj)
-				this.operatorVal = ""
-				this.subFilters = []
+					// 触发 action：目前只做了表述文字，还需要进行筛选的value值
+					this.addFilter(filterObj)
+					this.operatorVal = ""
+					this.subFilters = []
+				}, 0)
 			},
 			getFilterWordPrimitive(operator, operatorWords, val){
 				var primitiveFilterWords = ""

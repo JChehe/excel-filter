@@ -3,7 +3,7 @@
 	<main class="is-fullwidth">
 		<div class="columns is-gapless is-mobile is-overlay">
 			<side-bar class="column is-narrow"></side-bar>
-			<right-display-area class="column"></right-display-area>
+			<right-display-area class="column right-display-area"></right-display-area>
 			<div class="emit-enter-button" title="点击弹出侧边栏" @click="toggleSideBar" v-show="!getSideBarStatus" transition="horizontalMove">
 				<span class="icon is-pulled-right toggle-button">
 					<i class="fa fa-angle-right"></i>
@@ -56,6 +56,11 @@
 	main>*{
 		width: 100%;
 	}
+	.right-display-area{
+		min-width: 660px;
+		overflow-x: auto;
+
+	}
 	.columns>.column:last-child{
 		width: calc(100% - 275px)
 	}
@@ -79,7 +84,7 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 	}
-
+	
 	.horizontalMove-transition{
 		-webkit-transition: all .6s;
 		transition: all .6s;

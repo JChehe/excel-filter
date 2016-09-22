@@ -1,7 +1,8 @@
 <!-- Excel 中的 Sheet -->
 <template>
-	<div class="table-responsive" 
+	<div class="table-responsive sheet-of-excel" 
 		:class="{'isShowSideBar': !sideBarStatus}">
+
 		<table class="table is-bordered">
 			<thead>
 				<tr>
@@ -33,7 +34,6 @@
 			</tbody>
 
 		</table>
-		<!-- {{generateHTMLString}} -->
 	</div>
 </template>
 
@@ -71,7 +71,6 @@
 		},
 		computed: {
 			colNum (){
-				// console.log("this.colKeys.length", this.colKeys.length)
 				return this.colKeys.length + 1
 			},
 			rawNum (){
@@ -79,6 +78,8 @@
 				return this.sheetData.length
 			},
 			generateHTMLString(){
+				var tStart = window.performance.now()
+
 				var sheetData = this.sheetData
 
 				var resultHeadStr = "<tr><td>1</td>"
@@ -89,7 +90,7 @@
 
 				var resultBodyStr = ""
 
-				for(var i = 0, len = this.rawNum; i < len; i++){
+				for(var i = 0, len = Math.min(this.rawNum, 50); i < len; i++){
 					var resultTrStr = "<tr>"
 					this.colKeys.forEach((key, index) => {
 						if(index === 0){
@@ -106,6 +107,8 @@
 					resultBodyStr += resultTrStr
 				}
 				// console.log((resultHeadStr + resultBodyStr))
+				var tEnd = window.performance.now()
+				console.log(`字符串拼接耗时${tEnd - tStart}毫秒`)
 				return (resultHeadStr + resultBodyStr)
 			}
 		},
@@ -122,9 +125,9 @@
 		/* table不卡起决定性作用 */
 		transform: translate3d(0,0,0);
 	}
+	.table-responsive {
+	}
 	.table-responsive table{
-		width: 100%;
-		max-width: 100%
 	}
 	table{
 		margin-bottom: 0;
@@ -135,7 +138,31 @@
 	table thead tr th, table thead th:hover,table tbody tr td:first-child, table tbody tr td:first-child:hover{
 		background-color: #eee;
 	}
-	table tbody>tr:first-child td{
+
+</style>
+<style>
+	/* 由于td是自己后续加的，没有添加vue属性，放在 scoped里面则不会匹配这些样式 */
+	#excelBody>tr:first-child td{
 		white-space: nowrap;
+	}
+	.sheet-of-excel thead>tr:first-child>th:first-child{
+		position: relative;
+		background-image: linear-gradient(to top right, transparent, transparent calc(50% - 0.5px), #d3d6db calc(50% - 0.5px), #d3d6db calc(50% + 0.5px), transparent calc(50% + 0.5px));
+	}
+	.sheet-of-excel thead>tr:first-child>th:first-child::before{
+		content: "行";
+		width: 50%;
+		text-align: center;
+		position: absolute;
+		right: 0;
+		top: 3px;
+	}
+	.sheet-of-excel thead>tr:first-child>th:first-child::after{
+		content: "列";
+		position: absolute;
+		width: 50%;
+		text-align: center;
+		left: 0;
+		bottom: 3px;
 	}
 </style>

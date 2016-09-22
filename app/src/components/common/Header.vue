@@ -2,7 +2,7 @@
 	<header class="is-overlay">
 		<nav class="nav">
 		  <div class="nav-left">
-		    <a class="nav-item is-brand" href="#">
+		    <a class="nav-item is-brand" v-link="{path: '/'}">
 		      <img src="./assets/o2logo.png" alt="Aotu logo}">
 		    </a>
 		  </div>

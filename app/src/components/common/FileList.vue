@@ -15,7 +15,7 @@
 		      <i class="fa fa-book"></i>
 		    </span>
 		    {{ file.name }}
-		    <button class="button is-small" 
+		    <button class="button is-small" :class="{'is-loading': $index === curLoadingIndex}" 
 		    	@click="confirm(file.path, $index)">
 		    	导入
 		    </button>
@@ -29,7 +29,6 @@
 	import xlsx from 'xlsx'
 	import fs from 'fs'
 	import pathModule from 'path'
-
 	import { changeFileType, setExcelData, setActiveSheet, setUploadFiles, delUploadFiles } from '../../vuex/actions'
 	import { getCurSearchVal, getAllFileType, getUploadFiles } from '../../vuex/getters'
 
@@ -38,7 +37,8 @@
 			return {
 				curTypeIndex: 0,
 				curTypeName: "all",
-				filterFileList: []
+				filterFileList: [],
+				curLoadingIndex: -1
 			}
 		},
 		vuex: {
@@ -63,23 +63,29 @@
 			confirm(path, index){
 				var isConfirm = window.confirm("导入该文件会覆盖目前的筛选结果，是否确认要导入？")
 				if(isConfirm) {
+					this.$nextTick(() => {
+						this.curLoadingIndex = index
+					})
 					fs.stat(path, (err, stats) => {
 						if(stats && stats.isFile()) {
 							var workbook = xlsx.readFile(path)
 							this.setExcelData(workbook)
 							this.setActiveSheet(0)
+							
+							console.log("第五阶段")
+							
 							this.setUploadFiles({
 					      path: path,
 					      name: pathModule.basename(path),
 					      extname: pathModule.extname(path)
 					    })
-							console.log("第五阶段")
 						}else{
 							var isDelConfirm = window.confirm("当前文件不存在，是否删除该记录？")
 							if(isDelConfirm) {
 								this.delUploadFiles(index)
 							}
 						}
+						this.curLoadingIndex = -1
 					})
 				}
 			}
@@ -112,6 +118,9 @@
 	}
 	.list>a{
 		position: relative;
+	}
+	.list>a .button.is-loading{
+		display: block;
 	}
 	.list>a:hover .button{
 		display: block;

@@ -13,6 +13,7 @@ const state = {
   	index: 0,
   	name: ""
   },
+  filterStatus: 0,
   filterOptions: [
     {
   		char: ">",
@@ -61,8 +62,12 @@ const state = {
 // 疑问：修改filterTagList 却不会触发DOM更新。而依赖于 activeSheet
 const mutations = {
   [types.SET_EXCEL_DATA] (state, data) {
+    var tStart = window.performance.now();
     state.excelData = new ExcelSet.Excel().init(data)
     initFilterState(state, state.excelData.sheetNameList)
+
+    var tEnd = window.performance.now()
+    console.log(`上传文件后，初始化数据耗时${ tEnd - tStart }毫秒`)
     console.log("第4阶段")
   },
 
@@ -83,6 +88,8 @@ const mutations = {
   [types.DEL_FILTER] (state, index) {
     var curSheetName = state.activeSheet.name
 		var tempTagList = Object.assign({}, state.filterTagList)
+
+    // console.log("delete_index", index)
     tempTagList[curSheetName].splice(index, 1)
   	state.filterTagList = tempTagList
 
@@ -93,6 +100,7 @@ const mutations = {
       state.filteredData = addDelHandler()
   	}else{
   		state.filteredData = Object.assign({}, state.excelData)
+      state.filterStatus = 0
   	}
   },
   
@@ -109,6 +117,10 @@ const mutations = {
       excelData: state.excelData, 
       fileName: "过滤后的Excel.xlsx"
     })
+  },
+
+  [types.SET_FILTER_STATUS] (state, val) {
+    state.filterStatus = val
   }
 }
 
@@ -129,6 +141,7 @@ function addDelHandler(){
   var curSheetName = state.activeSheet.name
   var tempFilteredData = Object.assign({}, state.excelData)
   
+  var tStart = window.performance.now();
   for(var i = 0, len = state.filterTagList[curSheetName].length; i < len; i++){
     var curFilter = state.filterTagList[curSheetName][i]
     var subFilters = curFilter.subFilters
@@ -143,6 +156,10 @@ function addDelHandler(){
       colOperator: curFilter.colOperator
     })
   }
+  var tEnd = window.performance.now();
+  console.log(`过滤时间总耗时${ tEnd - tStart }毫秒`)
+  console.log("shi delete ma ")
+  state.filterStatus = 0
   return tempFilteredData
 }
 
@@ -224,7 +241,7 @@ var filterSet = {
           subFilters,
           filterCol
         })
-        console.log("isCurColPassed", isCurColPassed)
+        // console.log("isCurColPassed", isCurColPassed)
         if(isCurColPassed) {
           isRowPassed = true
           break
@@ -243,7 +260,7 @@ var filterSet = {
 
     var result = sheetData.filter((row, index) => {
       var curVal = row[selectKey]
-      console.log("curVal", row[selectKey])
+      // console.log("curVal", row[selectKey])
       // 过滤掉空表格
       if(curVal == undefined)
         return false

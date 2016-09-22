@@ -1,30 +1,39 @@
 <template>
-	<span class="tag is-warning" 
-		:title="filterObj.operator + filterObj.value">
+	<span class="tag is-warning">
 		{{ filterObj.filterWords }}
 		<button class="delete" 
-			@click="delFilter($index)">
+			@click="delHandler(tagIndex)">
 		</button>
 	</span>
 </template>
 
 <script>
-	import { delFilter } from '../../vuex/actions'
+	import { delFilter, setFilterStatus } from '../../vuex/actions'
 
 	export default {
 		props: {
 			filterObj: {
 				type: Object,
 				required: true
+			},
+			tagIndex: {
+				type: Number,
+				required: true
 			}
 		},
 		vuex: {
 			actions: {
-				delFilter
+				delFilter,
+				setFilterStatus
 			}
 		},
 		methods: {
-
+			delHandler(index){
+				this.setFilterStatus(1)
+				setTimeout(() => {
+					this.delFilter(index)
+				}, 1)
+			}
 		}
 	}
 </script>

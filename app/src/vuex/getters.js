@@ -35,7 +35,9 @@ export function getColKeys(state) {
 	var curSheet = state.filterList.activeSheet
 	return state.filterList.excelData[curSheet.name + '_headers']
 }
-
+export function getFilterStatus(state) {
+	return state.filterList.filterStatus
+}
 // 其他
 export function getSideBarStatus(state) {
 	return state.fileList.isShowSideBar

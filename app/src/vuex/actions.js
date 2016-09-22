@@ -41,6 +41,9 @@ export const delFilter = ({ dispatch }, val) => {
 export const setFilteredData = ({ dispatch }, val) => {
 	dispatch(types.SET_FILTERED_DATA, val)
 }
+export const setFilterStatus = ({ dispatch }, val) => {
+	dispatch(types.SET_FILTER_STATUS, val)
+}
 
 // 其他
 export const toggleSideBar = ({ dispatch }) => {

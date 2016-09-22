@@ -1,7 +1,6 @@
 <template>
 	<nav id="sidebar" class="panel" 
-		v-show="getSideBarStatus" 
-		transition="horizontalMove">
+		v-show="getSideBarStatus">
 		<div class="panel-heading has-text-left">
 			文件列表
 			<span class="icon is-pulled-right toggle-button" title="点击收缩侧栏边" 
@@ -47,6 +46,7 @@
 		height: calc(100vh - 50px);
 		position: relative;
 		overflow: hidden;
+		transform: translateZ(0);
 	}
 
 	.panel-heading{
@@ -57,29 +57,16 @@
 		background-color: rgba(255,255,255,.9);
 		position: absolute;
 		right: 0;
-		-webkit-transform: translateX(100%);
-		transform: translateX(100%);
+		-webkit-transform: translate3d(100%, 0, 0);
+		transform: translate3d(100%, 0, 0);
 	}
 
 	.toggle-button{
 		cursor: pointer;
 	}
 
-	.horizontalMove-transition{
-		-webkit-transition: all .6s;
-		transition: all .6s;
-	}
 
-	.horizontalMove-enter{
-		transform: translateX(0);
-		width: 0px;
-		opacity: 0;
-	}
-	.horizontalMove-leave{
-		transform: translateX(-100%);
-		opacity: 0;
-		width: 0;
-	}
+
 
 	
 </style>

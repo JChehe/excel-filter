@@ -1,7 +1,8 @@
 <template>
 	<div class="filter-list has-text-left">
 		<filter-tag v-for="filterObj in filterTagList[activeSheet.name]" 
-			:filter-obj="filterObj">
+			:filter-obj="filterObj" 
+			:tag-index="$index">
 		</filter-tag>
 	</div>
 </template>
@@ -24,17 +25,6 @@
 				filterTagList: getFilterTagList,
 				activeSheet: getActiveSheet,
 				excelData: getExcelData
-			}
-		},
-		computed: {
-			curSheetName: {
-				cache: false,
-				get() {
-					if(this.excelData && this.excelData.sheetNameList instanceof Array){
-						var curSheetName = this.activeSheet.name
-						return curSheetName
-					}
-				}
 			}
 		}
 	}

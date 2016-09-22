@@ -45,7 +45,7 @@
 						</div>
 					</td>
 					<td>
-						<button class="button">确定</button>
+						<filter-button :filter-status="filterStatus"></filter-button>
 					</td>
 				</tr>
 			</tbody>
@@ -54,10 +54,14 @@
 </template>
 
 <script>
-	import { getNumCol } from "../../utils/ExcelSet"
+	import filterButton from './filterButton'
+	import { getNumCol, getCharCol } from "../../utils/ExcelSet"
 	import { getFilterOptions } from '../../vuex/getters'
-	import { addFilter } from '../../vuex/actions'
+	import { addFilter, setFilterStatus } from '../../vuex/actions'
 	export default{
+		components: {
+			filterButton
+		},
 		data(){
 			return {
 				operatorVal: "",
@@ -95,7 +99,8 @@
 				filterOptions: getFilterOptions
 			},
 			actions: {
-				addFilter
+				addFilter,
+				setFilterStatus
 			}
 		},
 		computed: {
@@ -110,56 +115,69 @@
 		methods:{
 			getNumCol,
 			addFilterHandler(){
+				
 				var filterObj = {}
 				var filterWords = ""
-				var curCol = this.operatorCol.trim().split(/,?，?/)
+				var curCols = this.operatorCol.trim().split(/,?，?/)
 				var operator = this.operator
 				var operatorWords = this.getOperatorWords(operator)
 				var opVal = this.operatorVal.trim()
 				var colOperatorSelect = this.colOperatorSelect
 				var colOperatorWords = this.getColOperatorWords(colOperatorSelect)
 
-				for(var i = 0, len = curCol.length; i < len; i++){
-					var cCol = curCol[i]
+
+				for(var i = 0, len = curCols.length; i < len; i++){
+					var cCol = curCols[i]
 					if(cCol.match(/[a-z]/ig)){
-						curCol.splice(i, 1, getNumCol(cCol))
+						curCols.splice(i, 1, getNumCol(cCol))
 					}
 				}
 
-				if(curCol.length === 0 || opVal.length === 0) {
+				if(curCols.length === 0 || opVal.length === 0) {
 					alert("第2种表格 请填写完整")
+
 					return
 				}
 
-				if(colOperatorSelect.includes("time") && curCol.length > 2){
+				if(colOperatorSelect.includes("time") && curCols.length > 2){
 					alert("时间相关的操作只能选择两列")
 					this.operatorCol = ""
 					return
 				}
-
-				var preStr = `第${curCol}列的值`
-
-				filterWords = preStr + this.getFilterWordPrimitive(operator, colOperatorWords, operatorWords, opVal)
-
-				// 减一处理，以符合计算机的逻辑
-				curCol.forEach((item, index) => {
-					return curCol[index] = item - 1
+				
+				this.$nextTick(() => {
+					this.setFilterStatus(1)
 				})
 
-				filterObj = {
-					col: curCol,
-					operator: this.operator,
-					value: opVal,
-					filterWords: filterWords,
-					subFilters: this.subFilters,
-					colOperator: this.colOperatorSelect
-				}
-				console.log("filterObj",filterObj)
-				this.addFilter(filterObj)
+				setTimeout( () => {
+					var colText = ""; 
+					curCols.forEach((col, index) => {
+						colText += `, ${getCharCol(col)}`
+					})
+					// colText去掉逗号+空格）字符
+					var preStr = `第${colText.slice(2)}列的值`
 
-				this.operatorCol = ""
-				this.operatorVal = ""
+					filterWords = preStr + this.getFilterWordPrimitive(operator, colOperatorWords, operatorWords, opVal)
 
+					// 减一处理，以符合计算机的逻辑
+					curCols.forEach((item, index) => {
+						return curCols[index] = item - 1
+					})
+
+					filterObj = {
+						col: curCols,
+						operator: this.operator,
+						value: opVal,
+						filterWords: filterWords,
+						subFilters: this.subFilters,
+						colOperator: this.colOperatorSelect
+					}
+					console.log("filterObj",filterObj)
+					this.addFilter(filterObj)
+
+					this.operatorCol = ""
+					this.operatorVal = ""
+				}, 0)
 			},
 			getColOperatorWords(colOperatorSelect){
 				for(var i = 0, len = this.colOperator.length; i < len; i++){

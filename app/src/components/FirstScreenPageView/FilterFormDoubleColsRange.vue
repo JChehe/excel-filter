@@ -74,7 +74,7 @@
 						</div>
 					</td>
 					<td>
-						<button class="button">确定</button>
+						<filter-button :filter-status="filterStatus"></filter-button>
 					</td>
 				</tr>
 			</tbody>
@@ -83,11 +83,15 @@
 </template>
 
 <script>
-	import { addFilter } from '../../vuex/actions'
+	import filterButton from './filterButton'
+	import { addFilter, setFilterStatus } from '../../vuex/actions'
 	import { getActiveSheet, getFilterOptions, getExcelData } from '../../vuex/getters'
 	import { getCharCol } from '../../utils/ExcelSet'
 
 	export default {
+		components: {
+			filterButton
+		},
 		data(){
 			return {
 				operatorVal: "",
@@ -105,7 +109,8 @@
 				excelData: getExcelData
 			},
 			actions: {
-				addFilter
+				addFilter,
+				setFilterStatus
 			}
 		},
 		computed: {
@@ -158,7 +163,6 @@
 				this.subFilters.splice(index, 1)
 			},
 			addFilterHandler() {
-
 				var filterObj = {}
 				var filterWords = ""
 				// var curCol = this.operatorCol
@@ -193,42 +197,48 @@
 					return 
 				}
 
-				var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值中，存在至少一个`
+				this.$nextTick(() => {
+					this.setFilterStatus(1)
+				})
 
-				if(!this.isNotSingleLogicGroupOperator) {
-					var tempStr = ""
-					for(var i = 0, len = subFilters.length; i < len; i++){
-						var curFilter = this.subFilters[i]
-						var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
-						tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords}` : `${primitiveFilterWords}`
+				setTimeout(()=>{
+
+					var preStr = `第${curCol[0]}至第${curCol[1]}列范围内的值中，存在至少一个`
+
+					if(!this.isNotSingleLogicGroupOperator) {
+						var tempStr = ""
+						for(var i = 0, len = subFilters.length; i < len; i++){
+							var curFilter = this.subFilters[i]
+							var primitiveFilterWords = this.getFilterWordPrimitive(curFilter.operator, curFilter.words, curFilter.val)
+							tempStr += i !== len - 1 ? `${primitiveFilterWords} ${operatorWords}` : `${primitiveFilterWords}`
+						}
+						filterWords = preStr + tempStr
+					}else{
+						filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
 					}
-					filterWords = preStr + tempStr
-				}else{
-					filterWords = preStr + this.getFilterWordPrimitive(operator, operatorWords, opVal)
-				}
 
-				console.log(this.subFilters)
-				var tempCols = []
-				for(var i = +curCol[0], len = +curCol[1]; i <= len; i++){
-					tempCols.push(i - 1)
-				}
-				curCol = tempCols
-				console.log("根据首尾两元素获得它们之间的所有元素，并且所有元素进行减一处理", curCol)
-				filterObj = {
-					col: curCol,
-					operator: this.operator,
-					value: opVal,
-					filterWords: filterWords,
-					subFilters: this.subFilters,
-					colOperator: ""
-				}
-				console.log(filterObj)
-				// 触发 action：目前只做了表述文字，还需要进行筛选的value值
-				this.addFilter(filterObj)
+					console.log(this.subFilters)
+					var tempCols = []
+					for(var i = +curCol[0], len = +curCol[1]; i <= len; i++){
+						tempCols.push(i - 1)
+					}
+					curCol = tempCols
+					console.log("根据首尾两元素获得它们之间的所有元素，并且所有元素进行减一处理", curCol)
+					filterObj = {
+						col: curCol,
+						operator: this.operator,
+						value: opVal,
+						filterWords: filterWords,
+						subFilters: this.subFilters,
+						colOperator: ""
+					}
+					console.log(filterObj)
+					// 触发 action：目前只做了表述文字，还需要进行筛选的value值
+					this.addFilter(filterObj)
 
-				this.operatorVal = ""
-				this.subFilters = []
-				
+					this.operatorVal = ""
+					this.subFilters = []
+				}, 0)
 			},
 			getFilterWordPrimitive(operator, operatorWords, val){
 				var primitiveFilterWords = ""

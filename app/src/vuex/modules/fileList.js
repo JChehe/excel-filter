@@ -9,7 +9,7 @@ const state = {
   isShowSideBar: true
 }
 
-const mutations = {
+export const mutations = {
   [types.TOGGLE_SIDEBAR] (state) {
 	  state.isShowSideBar = !state.isShowSideBar
 	},

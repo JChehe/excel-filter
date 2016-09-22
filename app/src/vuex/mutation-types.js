@@ -13,7 +13,7 @@ export const DEL_FILTER = 'DEL_FILTER'
 export const SET_EXCEL_DATA = 'SET_EXCEL_DATA'
 export const SET_ACTIVE_SHEET = 'SET_ACTIVE_SHEET'
 export const SET_FILTERED_DATA = 'SET_FILTERED_DATA'
-
+export const SET_FILTER_STATUS = 'SET_FILTER_STATUS'
 // 其他
 export const TOGGLE_SIDEBAR = 'TOGGLE_SIDEBAR'
 export const EXPORT_FILE = 'EXPORT_FILE'
