@@ -84,9 +84,12 @@ Excel.prototype = {
       this[curSheetName + '_headers'] = []
       var scope = this.workbook.Sheets[curSheetName]["!ref"].split(":") // A1 F5
       var startIndex = getNumCol(extractLetters(scope[0])) // 从 1 开始
-      var endIndex = getNumCol(extractLetters(scope[1]))      
+      var endIndex = getNumCol(extractLetters(scope[1]))
+
+      var emptyIndex = 0    
       for(var i = startIndex; i <= endIndex; i++){
-        this[curSheetName + '_headers'].push(curSheetData[getCharCol(i) + '1'].v)
+        var curColKey = curSheetData[getCharCol(i) + '1'] == undefined ? `表头空${emptyIndex++}` : curSheetData[getCharCol(i) + '1'].v
+        this[curSheetName + '_headers'].push(curColKey)
       }
     })
     console.log("this", this)
