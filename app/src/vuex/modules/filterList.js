@@ -8,7 +8,7 @@ moment.locale("zh") // 设置时间格式为中文
 
 const SUFFIX_COLKEYS = "_headers"
 
-console.log(_.isEqual(.1+.2, .3))
+// console.log(_.isEqual(.1+.2, .3))
 const state = {
   filterTagList: {}, // 筛选条件列表
   excelData: {},
@@ -368,11 +368,14 @@ var filterSet = {
       return false
     }
     if(!isNaN(+curVal)){ // +"a" 是 NaN，另外：toFixed是为了避免浮点数的不精确表示，如 0.1+0.2 = 0.30000000000000004
-      curVal = _.isNumber(+curVal) ? (+curVal).toFixed(12) : (+curVal)
-      target = _.isNumber(+target) ? (+target).toFixed(12) : (+target)
+      // 另外toFixed 返回的是字符串类型
+      curVal = _.isNumber(+curVal) ? +(+curVal).toFixed(12) : (+curVal)
+      target = _.isNumber(+target) ? +(+target).toFixed(12) : (+target)
+      console.log("curVal", typeof curVal)
+    console.log("target", typeof target)
+      console.log("是数字")
     }
-    console.log("curVal", curVal)
-    console.log("target", target)
+    
     switch (operator) {
       case ">": return (curVal > target); break;
       case "<": return (curVal < target); break;

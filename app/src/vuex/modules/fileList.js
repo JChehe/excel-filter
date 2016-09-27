@@ -1,5 +1,5 @@
 import * as types from '../mutation-types'
-
+import { ipcRenderer } from 'electron'
 
 var uploadFiles = window.localStorage.uploadFiles ? JSON.parse(window.localStorage.uploadFiles) : []
 const state = {
@@ -32,6 +32,9 @@ export const mutations = {
     }else{
       state.fileList.unshift(val)
     }
+
+    // ipcRenderer.send("async-fileList", state.fileList)
+
     window.localStorage.setItem("uploadFiles", JSON.stringify(state.fileList))
   },
   [types.DEL_UPLOAD_FILES] (state, index) {
