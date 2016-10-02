@@ -188,7 +188,7 @@ var filterSet = {
       if(_.isArray(filterCol)){
         if(colOperator.length === 0){
           console.log("第3.1种情况：双列范围逻辑的【非or与and】")
-          return this.filterForDoubleColsRange({sheetData, filterCol, operator, target})
+          return this.filterByDoubleColsRange({sheetData, filterCol, operator, target})
         }else{
           console.log("第2种情况：多列运算逻辑")
           return this.filterByMultiColCalc({sheetData, filterCol, colOperator, operator, target})
@@ -273,7 +273,7 @@ var filterSet = {
     return result
   },
   // 双列范围逻辑的【非or、and】，即表单3.1
-  filterForDoubleColsRange(args) {
+  filterByDoubleColsRange(args) {
     var { sheetData, filterCol, operator, target } = args
     var colKeys = state.excelData[state.activeSheet.name + SUFFIX_COLKEYS]
    
