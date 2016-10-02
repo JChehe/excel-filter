@@ -117,13 +117,13 @@ Excel.prototype = {
   jsonToWBForOneSheet(json, colkeys, sheetName) {
     var _headers = colkeys // 获取表头
     var headers = _headers
-      .map((v, i) => Object.assign({}, { v: v, position: String.fromCharCode(65 + i) + 1 }))
+      .map((v, i) => Object.assign({}, { v: v, position: getCharCol(65 + i) + 1 }))
       .reduce((prev, next) => Object.assign({}, prev, {
         [next.position]: { v: next.v }
       }), {})
 
     var data = json
-      .map((v, i) => _headers.map((k, j) => Object.assign({}, { v: v[k], position: String.fromCharCode(65 + j) + (i + 2) })))
+      .map((v, i) => _headers.map((k, j) => Object.assign({}, { v: v[k], position: getCharCol(65 + j) + (i + 2) })))
       .reduce((prev, next) => prev.concat(next))
       .reduce((prev, next) => Object.assign({}, prev, {
         [next.position]: { v: next.v }
