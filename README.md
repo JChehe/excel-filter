@@ -1,3 +1,6 @@
+【项目已迁移到团队[github](https://github.com/o2team)】这是 [XCEL](https://github.com/o2team/xcel) 的早期版本。若需要 watch、Star、Fork，则去团队的 [github](https://github.com/o2team)。谢谢。
+
+
 # excelf_my
 
 > An electron-vue project
